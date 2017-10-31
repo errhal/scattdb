@@ -16,4 +16,6 @@ object ConfigurationProvider {
 
   def getDefaultPort(): Integer = Integer.parseInt(getProperty("scattdb.default.port"))
 
+  def getDbLocation(): String = getProperty("scattdb.db.files")
+
 }
