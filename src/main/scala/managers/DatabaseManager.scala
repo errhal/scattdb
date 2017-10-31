@@ -1,0 +1,7 @@
+package managers
+
+object DatabaseManager {
+
+
+
+}
