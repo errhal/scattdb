@@ -3,7 +3,7 @@ package listeners
 import java.io.{BufferedReader, InputStreamReader, PrintWriter}
 import java.net.{ServerSocket, Socket}
 
-import services.AuthenticationService
+import services.{AuthenticationService, QueryService}
 
 object SocketListener {
 
@@ -14,7 +14,7 @@ object SocketListener {
       val clientSocketOut = new PrintWriter(clientSocket.getOutputStream, true)
       val clientSocketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream))
 
-      val input = clientSocketIn.readLine();
+      val input = clientSocketIn.readLine()
       // recognize one message per line
       recognizeMessageType(input, clientSocketOut)
       clientSocket.close()
@@ -29,6 +29,7 @@ object SocketListener {
       } else {
         clientSocketOut.println("User successfully logged in")
       }
+      case "query" => clientSocketOut.println(QueryService.parseQuery(message))
     }
   }
 
