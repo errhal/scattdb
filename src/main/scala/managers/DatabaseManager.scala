@@ -45,6 +45,7 @@ object DatabaseManager {
   }
 
   def putKey(data: String, key: String, value: String): Boolean = {
+    if(!ConfigurationProvider.isDbInMemEnabled()) throw new NotImplementedError()
     val deserialized = new ObjectMapper().readValue(value, classOf[JsonNode])
     KeyValueMemStore.putValue(data, key, deserialized)
   }
