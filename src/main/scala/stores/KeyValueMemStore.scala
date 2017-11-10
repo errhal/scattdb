@@ -8,7 +8,7 @@ import scala.collection.concurrent.TrieMap
   */
 object KeyValueMemStore {
 
-  val keyValueDb = new TrieMap[String, TrieMap[String, AnyRef]]
+  private val keyValueDb = new TrieMap[String, TrieMap[String, AnyRef]]
 
   def putValue(data: String, key: String, value: AnyRef): Boolean = {
     var dataKeyValue = keyValueDb.getOrElseUpdate(data, new TrieMap[String, AnyRef]())

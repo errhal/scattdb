@@ -17,6 +17,8 @@ object SocketListener {
       val input = clientSocketIn.readLine()
       // recognize one message per line
       recognizeMessageType(input, clientSocketOut)
+
+      clientSocketIn.close()
       clientSocket.close()
     }
   }

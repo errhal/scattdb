@@ -15,7 +15,7 @@ object DatabaseManager {
   }
 
   def initializeKeyValueDbFile(): Unit = {
-    val dbFile = new File(ConfigurationProvider.getDbLocation() + "/" + keyValueDbFile)
+    val dbFile = new File(ConfigurationProvider.getDbLocation() + File.separator + keyValueDbFile)
     if (!dbFile.exists()) {
       dbFile.createNewFile()
     } else {
@@ -27,16 +27,23 @@ object DatabaseManager {
   }
 
   def loadData(datafile: String): JsonNode = {
-    val dbFile = new File(ConfigurationProvider.getDbLocation() + "/" + datafile + ".db")
-    val objectMapper = new ObjectMapper()
+    val dbFile = new File(ConfigurationProvider.getDbLocation() + File.separator + datafile + ".db")
+    val objectMapper = new ObjectMapper
     val jsonNode = objectMapper.readValue(dbFile, classOf[JsonNode])
     jsonNode
   }
 
-  def getKey(data: String, key: String): String = {
+  /**
+    * Returns serialized value for specified key and dataset. This method always returns values from memory.
+    *
+    * @param dataset we want get key/value from
+    * @param key we want obtain value for
+    * @return serialized value
+    */
+  def getKey(dataset: String, key: String): String = {
 
     if (!ConfigurationProvider.isDbInMemEnabled()) throw new NotImplementedError()
-    new ObjectMapper().writeValueAsString(getValueFromMem(data, key))
+    new ObjectMapper().writeValueAsString(getValueFromMem(dataset, key))
 
     //    TODO: persistence
     //        val objectMapper = new ObjectMapper()
@@ -44,10 +51,18 @@ object DatabaseManager {
     //    jsonNode
   }
 
-  def putKey(data: String, key: String, value: String): Boolean = {
-    if(!ConfigurationProvider.isDbInMemEnabled()) throw new NotImplementedError()
+  /**
+    * Puts value into key/value dataset. Depending on configuration, it puts values into memory or memory + persistence.
+    *
+    * @param dataset we want put key/value into
+    * @param key we want put value for
+    * @param value we want to put
+    * @return true if value was successfully inserted, false otherwise
+    */
+  def putKey(dataset: String, key: String, value: String): Boolean = {
+    if (!ConfigurationProvider.isDbInMemEnabled()) throw new NotImplementedError()
     val deserialized = new ObjectMapper().readValue(value, classOf[JsonNode])
-    KeyValueMemStore.putValue(data, key, deserialized)
+    KeyValueMemStore.putValue(dataset, key, deserialized)
   }
 
   def getValueFromMem(data: String, key: String): AnyRef = {
