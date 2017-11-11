@@ -11,8 +11,11 @@ object KeyValueMemStore {
   private val keyValueDb = new TrieMap[String, TrieMap[String, AnyRef]]
 
   def putValue(data: String, key: String, value: AnyRef): Boolean = {
-    var dataKeyValue = keyValueDb.getOrElseUpdate(data, new TrieMap[String, AnyRef]())
-    dataKeyValue += (key -> value)
+
+    if (!keyValueDb.contains(data)) {
+      keyValueDb.put(data, new TrieMap[String, AnyRef])
+    }
+    keyValueDb(data) += (key -> value)
     true
   }
 

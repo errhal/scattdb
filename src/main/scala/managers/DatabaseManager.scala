@@ -9,6 +9,7 @@ import stores.KeyValueMemStore
 object DatabaseManager {
 
   val keyValueDbFile = "keyValue.db"
+  val objectMapper = new ObjectMapper
 
   def initDbFiles(): Unit = {
     initializeKeyValueDbFile()
@@ -28,7 +29,6 @@ object DatabaseManager {
 
   def loadData(datafile: String): JsonNode = {
     val dbFile = new File(ConfigurationProvider.getDbLocation() + File.separator + datafile + ".db")
-    val objectMapper = new ObjectMapper
     val jsonNode = objectMapper.readValue(dbFile, classOf[JsonNode])
     jsonNode
   }
@@ -43,7 +43,7 @@ object DatabaseManager {
   def getKey(dataset: String, key: String): String = {
 
     if (!ConfigurationProvider.isDbInMemEnabled()) throw new NotImplementedError()
-    new ObjectMapper().writeValueAsString(getValueFromMem(dataset, key))
+    objectMapper.writeValueAsString(getValueFromMem(dataset, key))
 
     //    TODO: persistence
     //        val objectMapper = new ObjectMapper()
@@ -61,7 +61,7 @@ object DatabaseManager {
     */
   def putKey(dataset: String, key: String, value: String): Boolean = {
     if (!ConfigurationProvider.isDbInMemEnabled()) throw new NotImplementedError()
-    val deserialized = new ObjectMapper().readValue(value, classOf[JsonNode])
+    val deserialized = objectMapper.readValue(value, classOf[JsonNode])
     KeyValueMemStore.putValue(dataset, key, deserialized)
   }
 
