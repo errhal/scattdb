@@ -2,10 +2,6 @@ package stores
 
 import scala.collection.concurrent.TrieMap
 
-
-/**
-  * Created by Kamil Radziszewski on 08.11.17.
-  */
 object KeyValueMemStore {
 
   private val keyValueDb = new TrieMap[String, TrieMap[String, AnyRef]]

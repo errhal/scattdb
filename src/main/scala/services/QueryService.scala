@@ -4,9 +4,6 @@ import java.lang.IllegalArgumentException
 
 import managers.DatabaseManager
 
-/**
-  * Created by Kamil Radziszewski on 01.11.17.
-  */
 object QueryService {
 
   val keyStoreSelectPattern = "query\\[select[ ]+key\\(([A-Za-z0-9]*)\\)[ ]+from[ ]+([A-Za-z0-9]*)\\]"
