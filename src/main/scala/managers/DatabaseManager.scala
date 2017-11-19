@@ -3,13 +3,16 @@ package managers
 import java.io.File
 
 import com.fasterxml.jackson.databind.{JavaType, JsonNode, ObjectMapper}
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import config.ConfigurationProvider
 import stores.KeyValueMemStore
 
 object DatabaseManager {
 
   val keyValueDbFile = "keyValue.db"
-  val objectMapper = new ObjectMapper
+  val objectMapper = new ObjectMapper with ScalaObjectMapper
+  objectMapper.registerModule(DefaultScalaModule)
 
   def initDbFiles(): Unit = {
     initializeKeyValueDbFile()
