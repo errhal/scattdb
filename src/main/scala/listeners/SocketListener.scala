@@ -3,12 +3,14 @@ package listeners
 import java.io.{BufferedReader, InputStreamReader, PrintWriter}
 import java.net.{ServerSocket, Socket}
 
+import managers.DatabaseManager
 import services.{AuthenticationService, QueryService}
 
 object SocketListener {
 
   def init(serverSocket: ServerSocket): Unit = {
 
+    DatabaseManager.initDbFiles()
     while (true) {
       val clientSocket = serverSocket.accept()
       val clientSocketOut = new PrintWriter(clientSocket.getOutputStream, true)

@@ -1,23 +1,27 @@
 package stores
 
+import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
+
 import scala.collection.concurrent.TrieMap
 
 object KeyValueMemStore {
 
-  private val keyValueDb = new TrieMap[String, TrieMap[String, AnyRef]]
+  val keyValueDb = new ConcurrentHashMap[String, ConcurrentHashMap[String, AnyRef]]
 
   def putValue(data: String, key: String, value: AnyRef): Boolean = {
 
-    if (!keyValueDb.contains(data)) {
-      keyValueDb.put(data, new TrieMap[String, AnyRef])
+    if (!keyValueDb.containsKey(data)) {
+      keyValueDb.put(data, new ConcurrentHashMap[String, AnyRef])
     }
-    keyValueDb(data) += (key -> value)
+    keyValueDb.get(data).put(key, value)
     true
   }
 
   def getValue(data: String, key: String): AnyRef = {
-    if (!keyValueDb.contains(data)) throw new IllegalArgumentException("Specified data does not exist in memory.")
-    keyValueDb(data)(key)
+    if (!keyValueDb.containsKey(data)) throw new IllegalArgumentException("Specified data does not exist in memory.")
+    keyValueDb.get(data).get(key)
   }
+
+  def getKeyValueMap(): ConcurrentHashMap[String, ConcurrentHashMap[String, AnyRef]] = keyValueDb
 
 }
