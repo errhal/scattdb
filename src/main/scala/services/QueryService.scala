@@ -6,8 +6,8 @@ import managers.DatabaseManager
 
 object QueryService {
 
-  val keyStoreSelectPattern = "query\\[select[ ]+key\\(([A-Za-z0-9]*)\\)[ ]+from[ ]+([A-Za-z0-9]*)\\]"
-  val keyStoreInsertPattern = "query\\[insert[ ]+key\\(([A-Za-z0-9]*)\\)[ ]+into[ ]+([A-Za-z0-9]*)[ ]+data\\(([^\\(\\)]*)\\)\\]"
+  val keyStoreSelectPattern = "query\\[select[ ]+key\\(([A-Za-z0-9]+)\\)[ ]+from[ ]+([A-Za-z0-9]+)\\]"
+  val keyStoreInsertPattern = "query\\[insert[ ]+key\\(([A-Za-z0-9]+)\\)[ ]+into[ ]+([A-Za-z0-9]+)[ ]+data\\(([^\\(\\)]+)\\)\\]"
 
   def parseQuery(message: String): String = {
 
@@ -20,7 +20,7 @@ object QueryService {
     }
     else if (message.matches(keyStoreInsertPattern)) {
       if (putKeyValue(message)) {
-        "Succesfully inserted one key."
+        "Successfully inserted one key."
       } else {
         "Failed to insert specified key."
       }
