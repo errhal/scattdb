@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap
 import com.fasterxml.jackson.databind.{JavaType, JsonNode, ObjectMapper}
 import com.google.common.io.Files
 import config.ConfigurationProvider
-import stores.KeyValueMemStore
+import stores.{EntryMemStore, KeyValueMemStore}
 
 object DatabaseManager {
 
@@ -100,6 +100,26 @@ object DatabaseManager {
     val printWriter = new PrintWriter(file)
     printWriter.print(objectMapper.writeValueAsString(KeyValueMemStore.getKeyValueMap().get(dataset)))
     printWriter.close()
+  }
+
+  def getEntry(dataset: String): String = {
+    //TODO: persistence data
+    val entry = getEntryFromMem(dataset)
+    objectMapper.writeValueAsString(entry)
+  }
+
+  def putEntry(dataset: String, entry: String): Boolean = {
+    //TODO: persistence data
+    val deserializedEntry = objectMapper.readValue(entry, classOf[JsonNode])
+    putEntryIntoMem(dataset, deserializedEntry)
+  }
+
+  def getEntryFromMem(dataset: String): ConcurrentHashMap[Long, JsonNode] = {
+    EntryMemStore.getEntry(dataset)
+  }
+
+  def putEntryIntoMem(dataset: String, entry: JsonNode): Boolean = {
+    EntryMemStore.putEntry(dataset, entry)
   }
 
 }
