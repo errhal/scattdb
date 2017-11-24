@@ -28,16 +28,16 @@ object QueryService {
         "Failed to insert specified key."
       }
     } else if (message.matches(entryStoreSelectPattern)) {
-      if (putEntry(message)) {
-        "Successfully inserted one entry."
-      } else {
-        "Failed to insert specified key."
-      }
-    } else if (message.matches(entryStoreInsertPattern)) {
       try {
         getEntry(message)
       } catch {
         case e: IllegalArgumentException => e.getMessage
+      }
+    } else if (message.matches(entryStoreInsertPattern)) {
+      if (putEntry(message)) {
+        "Successfully inserted one entry."
+      } else {
+        "Failed to insert specified key."
       }
     } else {
       "Invalid query."
@@ -63,16 +63,16 @@ object QueryService {
 
   def getEntry(message: String): String = {
     val entryQuery = entryStoreSelectPattern.r.findAllIn(message)
-    val dataset = entryQuery.group(1)
+    val dataset = entryQuery.group(2)
     // TODO: passing entry query param
-    val entry = entryQuery.group(0)
+    val entry = entryQuery.group(1)
     DatabaseManager.getEntry(dataset)
   }
 
   def putEntry(message: String): Boolean = {
-    val entryQuery = entryStoreSelectPattern.r.findAllIn(message)
-    val dataset = entryQuery.group(1)
-    val entry = entryQuery.group(0)
+    val entryQuery = entryStoreInsertPattern.r.findAllIn(message)
+    val dataset = entryQuery.group(2)
+    val entry = entryQuery.group(1)
     DatabaseManager.putEntry(dataset, entry)
     true
   }

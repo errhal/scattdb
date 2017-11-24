@@ -7,19 +7,20 @@ import com.fasterxml.jackson.databind.JsonNode
 object EntryMemStore {
 
   val entryDb = new ConcurrentHashMap[String, ConcurrentHashMap[Long, JsonNode]]()
-  val index = 0
+  var index = 0
 
   private val putLock = new Object
 
 
   def putEntry(dataset: String, entry: JsonNode): Boolean = {
     putLock.synchronized {
-      if (!entryDb.contains(dataset)) {
+      if (!entryDb.containsKey(dataset)) {
         entryDb.put(dataset, new ConcurrentHashMap[Long, JsonNode]())
       }
 
       val datasetMap = entryDb.get(dataset)
       datasetMap.put(index, entry)
+      index += 1
       true
     }
   }
