@@ -111,7 +111,9 @@ object DatabaseManager {
   def putEntry(dataset: String, entry: String): Boolean = {
     //TODO: persistence data
     val deserializedEntry = objectMapper.readValue(entry, classOf[JsonNode])
-    putEntryIntoMem(dataset, deserializedEntry)
+    val isInserted = putEntryIntoMem(dataset, deserializedEntry)
+    if (isInserted) if (ConfigurationProvider.isEntryPersistenceEnabled()) persistEntry(dataset)
+    isInserted
   }
 
   def getEntryFromMem(dataset: String): ConcurrentHashMap[Long, JsonNode] = {
@@ -120,6 +122,21 @@ object DatabaseManager {
 
   def putEntryIntoMem(dataset: String, entry: JsonNode): Boolean = {
     EntryMemStore.putEntry(dataset, entry)
+  }
+
+  def persistEntry(dataset: String) = {
+    val file = new File(ConfigurationProvider.getDbLocation()
+      + File.separator
+      + ConfigurationProvider.defaultEntryPrefix
+      + dataset)
+
+    if (!file.exists()) {
+      Files.createParentDirs(file)
+      file.createNewFile()
+    }
+    val printWriter = new PrintWriter(file)
+    printWriter.print(objectMapper.writeValueAsString(EntryMemStore.entryDb.get(dataset)))
+    printWriter.close
   }
 
 }

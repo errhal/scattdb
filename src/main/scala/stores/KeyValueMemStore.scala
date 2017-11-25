@@ -2,7 +2,6 @@ package stores
 
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 
-import scala.collection.concurrent.TrieMap
 
 object KeyValueMemStore {
 

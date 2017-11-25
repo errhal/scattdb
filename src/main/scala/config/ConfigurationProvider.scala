@@ -11,6 +11,7 @@ object ConfigurationProvider {
   val defaultDatabaseDir = "/tmp/scattdb"
   val defaultIsDbInMemEnabled = false
   val defaultKeyValuePrefix = "kv_"
+  val defaultEntryPrefix = "entry_"
 
   def getProperty(propertyName: String): String = {
 
@@ -27,6 +28,9 @@ object ConfigurationProvider {
     db
   }
 
-  def isKeyValuePersistenceEnabled():
-  Boolean = Try(getProperty("scattdb.persistKeyValue").toBoolean).getOrElse(defaultIsDbInMemEnabled)
+  def isKeyValuePersistenceEnabled(): Boolean =
+    Try(getProperty("scattdb.persistKeyValue").toBoolean).getOrElse(defaultIsDbInMemEnabled)
+
+  def isEntryPersistenceEnabled(): Boolean =
+    Try(getProperty("scattdb.persistKeyValue").toBoolean).getOrElse(defaultIsDbInMemEnabled)
 }
