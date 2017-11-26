@@ -4,20 +4,25 @@ import java.io._
 import java.util.concurrent.ConcurrentHashMap
 
 import com.fasterxml.jackson.databind.{JavaType, JsonNode, ObjectMapper}
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.google.common.io.Files
 import config.ConfigurationProvider
 import stores.{EntryMemStore, KeyValueMemStore}
+
+import scala.collection.concurrent.TrieMap
 
 object DatabaseManager {
 
   val keyValueDbFile = "keyValue.db"
   val objectMapper = new ObjectMapper
+  objectMapper.registerModule(DefaultScalaModule)
 
   /**
     * Used for reading data from files on application startup.
     */
   def initDbFiles(): Unit = {
     initializeKeyValueDbFile()
+    initializeEntryDbFile()
   }
 
   // TODO: thread unsafe method
@@ -31,11 +36,31 @@ object DatabaseManager {
     kvFiles.foreach((file: File) => {
       val dataset = file.getName.substring(ConfigurationProvider.defaultKeyValuePrefix.length)
       val keyValueMap = KeyValueMemStore.getKeyValueMap()
-      if (keyValueMap.contains(dataset)) {
+      if (keyValueMap.containsKey(dataset)) {
         throw new RuntimeException("Corrupted datafile.")
       }
       val deserializedMap = objectMapper.readValue(new FileReader(file), classOf[ConcurrentHashMap[String, AnyRef]])
       keyValueMap.put(dataset, deserializedMap)
+    })
+  }
+
+  def initializeEntryDbFile(): Unit = {
+    val dbDir = new File(ConfigurationProvider.getDbLocation())
+    val entryFiles = dbDir.listFiles(new FilenameFilter {
+      override def accept(file: File, s: String): Boolean = s.startsWith(ConfigurationProvider.defaultEntryPrefix)
+    })
+
+    if (entryFiles == null) return
+    entryFiles.foreach((file) => {
+      val dataset = file.getName.substring(ConfigurationProvider.defaultEntryPrefix.length)
+
+      val deserialized = objectMapper.readValue(file, classOf[JsonNode])
+
+      val trieMap = new TrieMap[Long, JsonNode]()
+      deserialized.fields().forEachRemaining((field) => {
+        trieMap += field.getKey.toLong -> field.getValue
+      })
+      EntryMemStore.entryDb += dataset -> trieMap
     })
   }
 
@@ -116,7 +141,7 @@ object DatabaseManager {
     isInserted
   }
 
-  def getEntryFromMem(dataset: String): ConcurrentHashMap[Long, JsonNode] = {
+  def getEntryFromMem(dataset: String): scala.collection.concurrent.Map[Long, JsonNode] = {
     EntryMemStore.getEntry(dataset)
   }
 
