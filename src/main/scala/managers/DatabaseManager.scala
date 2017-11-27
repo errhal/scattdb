@@ -44,6 +44,11 @@ object DatabaseManager {
     })
   }
 
+  /**
+    * Initializes entry database with data from files in specified directory.
+    * For simplicity it uses JsonNode class as source for concurrent map.
+    * Mapping json to Scala/Java map requires creating new map anyway.
+    */
   def initializeEntryDbFile(): Unit = {
     val dbDir = new File(ConfigurationProvider.getDbLocation())
     val entryFiles = dbDir.listFiles(new FilenameFilter {
