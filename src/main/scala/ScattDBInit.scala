@@ -1,6 +1,4 @@
-import java.io.{BufferedReader, InputStreamReader}
 import java.net.ServerSocket
-import java.util.Optional
 
 import config.ConfigurationProvider
 import listeners.SocketListener
