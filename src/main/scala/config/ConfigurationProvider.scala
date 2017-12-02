@@ -33,4 +33,13 @@ object ConfigurationProvider {
 
   def isEntryPersistenceEnabled(): Boolean =
     Try(getProperty("scattdb.persistKeyValue").toBoolean).getOrElse(defaultIsDbInMemEnabled)
+
+  def getServerType(): Int = {
+    getProperty("scattdb.serverType") match {
+      case "master/slave" => 0
+      case "master" => 1
+      case "slave" => 2
+      case _ => 0
+    }
+  }
 }
