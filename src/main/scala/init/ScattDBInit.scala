@@ -1,16 +1,19 @@
+package init
+
 import java.net.ServerSocket
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSelection, ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
 import config.ConfigurationProvider
 import listeners.SocketListener
 import remote.master.LookupActor
-import remote.slave.SelectorActor
+import remote.slave.KeyValueActor
 
 object ScattDBInit {
 
   val logger = Logger(this.getClass)
+  var remoteActor: ActorSelection = _
 
   def main(args: Array[String]) {
 
@@ -42,17 +45,18 @@ object ScattDBInit {
 
   def startRemoteSlaveSystem = {
     val system = ActorSystem("SlaveSystem", ConfigFactory.load("slave"))
-    system.actorOf(Props[SelectorActor], "selector")
+    system.actorOf(Props[KeyValueActor], "selector")
 
     logger.debug("Started remote slave system.")
   }
 
   def startRemoteMasterSystem = {
     val system = ActorSystem("MasterSystem", ConfigFactory.load("master"))
-    val remotePath = "akka.tcp://SlaveSystem@127.0.0.1:9001/user/selector"
-    val actor = system.actorOf(Props(classOf[LookupActor], remotePath), "lookupActor")
+//    val actor = system.actorOf(Props(classOf[LookupActor], remotePath), "lookupActor")
+    val remoteActor = system.actorSelection("akka.tcp://SlaveSystem@127.0.0.1:9001/user/selector")
 
     logger.debug("Started remote lookup system.")
+    this.remoteActor = remoteActor
   }
 
 }
