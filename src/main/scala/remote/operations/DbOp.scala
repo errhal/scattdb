@@ -8,4 +8,4 @@ final case class Select(dataset: String, key: String) extends DbOp
 
 trait DbResult
 
-final case class SelectResult(result: ConcurrentHashMap[String, AnyRef]) extends DbResult
+final case class SelectResult(result: String) extends DbResult

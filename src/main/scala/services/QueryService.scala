@@ -1,9 +1,17 @@
 package services
 
-import java.lang.IllegalArgumentException
+import java.util.concurrent.TimeoutException
 
+import init.ScattDBInit
 import managers.DatabaseManager
-import stores.EntryMemStore
+import remote.operations.{DbResult, Select, SelectResult}
+import akka.pattern.ask
+import akka.util.Timeout
+
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Awaitable, Future}
+import scala.util.Try
+
 
 object QueryService {
 
@@ -49,10 +57,16 @@ object QueryService {
     val keyValue = keyStoreSelectPattern.r.findAllIn(message)
     val dataset = keyValue.group(2)
     val key = keyValue.group(1)
-
-    DatabaseManager.getKey(dataset, key)
+    implicit val timeout = Timeout(5 seconds)
+    val fut = ScattDBInit.remoteActor ? Select(dataset, key)
+    // TODO: Blocks thread waiting for result
+    try {
+      val result: SelectResult = Await.result[SelectResult](fut.asInstanceOf[Awaitable[SelectResult]], 5 seconds)
+      result.result.toString
+    } catch {
+      case _: TimeoutException => "Timeout during fetching data"
+    }
   }
-
   def putKeyValue(message: String): Boolean = {
     val keyValue = keyStoreInsertPattern.r.findAllIn(message)
     val dataset = keyValue.group(2)
