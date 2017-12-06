@@ -20,53 +20,46 @@ object QueryService {
   val entryStoreSelectPattern = "query\\[select[ ]+entry\\(([^\\(\\)]+)\\)[ ]+from[ ]+([A-Za-z0-9]+)\\]"
   val entryStoreInsertPattern = "query\\[insert[ ]+entry\\(([^\\(\\)]+)\\)[ ]+into[ ]+([A-Za-z0-9]+)\\]"
 
-  def parseQuery(message: String): String = {
+  def parseQuery(message: String): Future[Any] = {
 
     if (message.matches(keyStoreSelectPattern)) {
-      try {
-        getKeyValue(message)
-      } catch {
-        case e: IllegalArgumentException => e.getMessage
-      }
-    }
-    else if (message.matches(keyStoreInsertPattern)) {
-      if (putKeyValue(message)) {
-        "Successfully inserted one key."
-      } else {
-        "Failed to insert specified key."
-      }
-    } else if (message.matches(entryStoreSelectPattern)) {
-      try {
-        getEntry(message)
-      } catch {
-        case e: IllegalArgumentException => e.getMessage
-      }
-    } else if (message.matches(entryStoreInsertPattern)) {
-      if (putEntry(message)) {
-        "Successfully inserted one entry."
-      } else {
-        "Failed to insert specified key."
-      }
+      getKeyValue(message)
     } else {
-      "Invalid query."
+      Future.failed(new IllegalArgumentException("Invalid query."))
     }
+//    TODO: Change db operations to make async req
+//    else if (message.matches(keyStoreInsertPattern)) {
+//      if (putKeyValue(message)) {
+//        "Successfully inserted one key."
+//      } else {
+//        "Failed to insert specified key."
+//      }
+//    } else if (message.matches(entryStoreSelectPattern)) {
+//      try {
+//        getEntry(message)
+//      } catch {
+//        case e: IllegalArgumentException => e.getMessage
+//      }
+//    } else if (message.matches(entryStoreInsertPattern)) {
+//      if (putEntry(message)) {
+//        "Successfully inserted one entry."
+//      } else {
+//        "Failed to insert specified key."
+//      }
+//    } else {
+//      "Invalid query."
+//    }
   }
 
-  def getKeyValue(message: String): String = {
+  def getKeyValue(message: String): Future[Any] = {
 
     val keyValue = keyStoreSelectPattern.r.findAllIn(message)
     val dataset = keyValue.group(2)
     val key = keyValue.group(1)
     implicit val timeout = Timeout(5 seconds)
-    val fut = ScattDBInit.remoteActor ? Select(dataset, key)
-    // TODO: Blocks thread waiting for result
-    try {
-      val result: SelectResult = Await.result[SelectResult](fut.asInstanceOf[Awaitable[SelectResult]], 5 seconds)
-      result.result.toString
-    } catch {
-      case _: TimeoutException => "Timeout during fetching data"
-    }
+    ScattDBInit.remoteActor ? Select(dataset, key)
   }
+
   def putKeyValue(message: String): Boolean = {
     val keyValue = keyStoreInsertPattern.r.findAllIn(message)
     val dataset = keyValue.group(2)
