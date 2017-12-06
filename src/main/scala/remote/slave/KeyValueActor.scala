@@ -1,6 +1,7 @@
 package remote.slave
 
 import akka.actor.Actor
+import akka.actor.Status.Failure
 import com.typesafe.scalalogging.Logger
 import managers.DatabaseManager
 import remote.operations.{Select, SelectResult}
@@ -11,9 +12,11 @@ class KeyValueActor extends Actor {
 
   def receive = {
     case Select(dataset, key) => {
-      sender() ! SelectResult(DatabaseManager.getKey(dataset, key))
-      print("Select key: {} from dataset: {}", key, dataset)
-
+      try {
+        sender() ! SelectResult(DatabaseManager.getKey(dataset, key))
+      } catch {
+        case e: Exception => sender() ! Failure(e)
+      }
     }
   }
 }
