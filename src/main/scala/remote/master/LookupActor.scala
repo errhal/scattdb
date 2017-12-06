@@ -3,7 +3,7 @@ package remote.master
 import scala.concurrent.duration._
 import akka.actor.{Actor, ActorIdentity, ActorRef, Identify, ReceiveTimeout, Terminated}
 import com.typesafe.scalalogging.Logger
-import remote.operations.{DbOp, DbResult, Select, SelectResult}
+import remote.operations.{DbOp, DbResult, SelectKeyValue, SelectResult}
 
 class LookupActor(path: String) extends Actor {
 

@@ -4,7 +4,7 @@ import java.util.concurrent.TimeoutException
 
 import init.ScattDBInit
 import managers.DatabaseManager
-import remote.operations.{DbResult, Select, SelectResult}
+import remote.operations.{DbResult, InsertKeyValue, SelectKeyValue, SelectResult}
 import akka.pattern.ask
 import akka.util.Timeout
 
@@ -20,35 +20,33 @@ object QueryService {
   val entryStoreSelectPattern = "query\\[select[ ]+entry\\(([^\\(\\)]+)\\)[ ]+from[ ]+([A-Za-z0-9]+)\\]"
   val entryStoreInsertPattern = "query\\[insert[ ]+entry\\(([^\\(\\)]+)\\)[ ]+into[ ]+([A-Za-z0-9]+)\\]"
 
+  implicit val _ = Timeout(5 seconds)
+
   def parseQuery(message: String): Future[Any] = {
 
     if (message.matches(keyStoreSelectPattern)) {
       getKeyValue(message)
+    } else if (message.matches(keyStoreInsertPattern)) {
+      putKeyValue(message)
     } else {
       Future.failed(new IllegalArgumentException("Invalid query."))
     }
-//    TODO: Change db operations to make async req
-//    else if (message.matches(keyStoreInsertPattern)) {
-//      if (putKeyValue(message)) {
-//        "Successfully inserted one key."
-//      } else {
-//        "Failed to insert specified key."
-//      }
-//    } else if (message.matches(entryStoreSelectPattern)) {
-//      try {
-//        getEntry(message)
-//      } catch {
-//        case e: IllegalArgumentException => e.getMessage
-//      }
-//    } else if (message.matches(entryStoreInsertPattern)) {
-//      if (putEntry(message)) {
-//        "Successfully inserted one entry."
-//      } else {
-//        "Failed to insert specified key."
-//      }
-//    } else {
-//      "Invalid query."
-//    }
+    //    TODO: Change db operations to make async req
+    //     else if (message.matches(entryStoreSelectPattern)) {
+    //      try {
+    //        getEntry(message)
+    //      } catch {
+    //        case e: IllegalArgumentException => e.getMessage
+    //      }
+    //    } else if (message.matches(entryStoreInsertPattern)) {
+    //      if (putEntry(message)) {
+    //        "Successfully inserted one entry."
+    //      } else {
+    //        "Failed to insert specified key."
+    //      }
+    //    } else {
+    //      "Invalid query."
+    //    }
   }
 
   def getKeyValue(message: String): Future[Any] = {
@@ -56,16 +54,15 @@ object QueryService {
     val keyValue = keyStoreSelectPattern.r.findAllIn(message)
     val dataset = keyValue.group(2)
     val key = keyValue.group(1)
-    implicit val timeout = Timeout(5 seconds)
-    ScattDBInit.remoteActor ? Select(dataset, key)
+    ScattDBInit.remoteActor ? SelectKeyValue(dataset, key)
   }
 
-  def putKeyValue(message: String): Boolean = {
+  def putKeyValue(message: String): Future[Any] = {
     val keyValue = keyStoreInsertPattern.r.findAllIn(message)
     val dataset = keyValue.group(2)
     val key = keyValue.group(1)
     val value = keyValue.group(3)
-    DatabaseManager.putKey(dataset, key, value)
+    ScattDBInit.remoteActor ? InsertKeyValue(dataset, key, value)
   }
 
   def getEntry(message: String): String = {
