@@ -1,17 +1,14 @@
 package services
 
-import java.util.concurrent.TimeoutException
 
 import init.ScattDBInit
 import managers.DatabaseManager
-import remote.operations.{DbResult, InsertKeyValue, SelectKeyValue, SelectResult}
+import remote.operations._
 import akka.pattern.ask
 import akka.util.Timeout
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable, Future}
-import scala.util.Try
-
 
 object QueryService {
 
@@ -28,17 +25,13 @@ object QueryService {
       getKeyValue(message)
     } else if (message.matches(keyStoreInsertPattern)) {
       putKeyValue(message)
+    } else if (message.matches(entryStoreSelectPattern)) {
+      getEntry(message)
     } else {
       Future.failed(new IllegalArgumentException("Invalid query."))
     }
     //    TODO: Change db operations to make async req
-    //     else if (message.matches(entryStoreSelectPattern)) {
-    //      try {
-    //        getEntry(message)
-    //      } catch {
-    //        case e: IllegalArgumentException => e.getMessage
-    //      }
-    //    } else if (message.matches(entryStoreInsertPattern)) {
+    //          else if (message.matches(entryStoreInsertPattern)) {
     //      if (putEntry(message)) {
     //        "Successfully inserted one entry."
     //      } else {
@@ -65,12 +58,12 @@ object QueryService {
     ScattDBInit.remoteActor ? InsertKeyValue(dataset, key, value)
   }
 
-  def getEntry(message: String): String = {
+  def getEntry(message: String): Future[Any] = {
     val entryQuery = entryStoreSelectPattern.r.findAllIn(message)
     val dataset = entryQuery.group(2)
     // TODO: passing entry query param
     val entry = entryQuery.group(1)
-    DatabaseManager.getEntry(dataset)
+    ScattDBInit.remoteActor ? SelectEntry(dataset)
   }
 
   def putEntry(message: String): Boolean = {
