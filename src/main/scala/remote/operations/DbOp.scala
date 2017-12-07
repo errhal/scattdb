@@ -8,6 +8,8 @@ final case class InsertKeyValue(dataset: String, key: String, value: String) ext
 
 final case class SelectEntry(dataset: String) extends DbOp
 
+final case class InsertEntry(dataset: String, entry: String) extends DbOp
+
 trait DbResult
 
 final case class SelectResult(result: String) extends DbResult

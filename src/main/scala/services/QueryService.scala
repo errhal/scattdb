@@ -27,19 +27,11 @@ object QueryService {
       putKeyValue(message)
     } else if (message.matches(entryStoreSelectPattern)) {
       getEntry(message)
+    } else if (message.matches(entryStoreInsertPattern)) {
+      putEntry(message)
     } else {
       Future.failed(new IllegalArgumentException("Invalid query."))
     }
-    //    TODO: Change db operations to make async req
-    //          else if (message.matches(entryStoreInsertPattern)) {
-    //      if (putEntry(message)) {
-    //        "Successfully inserted one entry."
-    //      } else {
-    //        "Failed to insert specified key."
-    //      }
-    //    } else {
-    //      "Invalid query."
-    //    }
   }
 
   def getKeyValue(message: String): Future[Any] = {
@@ -66,12 +58,11 @@ object QueryService {
     ScattDBInit.remoteActor ? SelectEntry(dataset)
   }
 
-  def putEntry(message: String): Boolean = {
+  def putEntry(message: String): Future[Any] = {
     val entryQuery = entryStoreInsertPattern.r.findAllIn(message)
     val dataset = entryQuery.group(2)
     val entry = entryQuery.group(1)
-    DatabaseManager.putEntry(dataset, entry)
-    true
+    ScattDBInit.remoteActor ? InsertEntry(dataset, entry)
   }
 
 }

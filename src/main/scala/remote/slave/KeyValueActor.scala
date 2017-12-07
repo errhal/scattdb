@@ -32,5 +32,12 @@ class KeyValueActor extends Actor {
         case e: Exception => sender() ! Failure(e)
       }
     }
+    case InsertEntry(dataset, entry) => {
+      try {
+        sender ! InsertResult(DatabaseManager.putEntry(dataset, entry))
+      } catch {
+        case e: Exception => sender ! Failure(e)
+      }
+    }
   }
 }
