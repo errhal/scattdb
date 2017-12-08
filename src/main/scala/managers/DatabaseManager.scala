@@ -166,7 +166,7 @@ object DatabaseManager {
     }
     val printWriter = new PrintWriter(file)
     printWriter.print(objectMapper.writeValueAsString(EntryMemStore.entryDb.get(dataset)))
-    printWriter.close
+    printWriter.close()
   }
 
 }

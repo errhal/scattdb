@@ -6,9 +6,9 @@ import com.typesafe.scalalogging.Logger
 import managers.DatabaseManager
 import remote.operations._
 
-class KeyValueActor extends Actor {
+class DBActor extends Actor {
 
-  val logger = Logger(classOf[KeyValueActor])
+  val logger = Logger(classOf[DBActor])
 
   def receive = {
     case SelectKeyValue(dataset, key) => {

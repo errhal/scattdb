@@ -8,7 +8,7 @@ import com.typesafe.scalalogging.Logger
 import config.ConfigurationProvider
 import listeners.SocketListener
 import remote.master.LookupActor
-import remote.slave.KeyValueActor
+import remote.slave.DBActor
 
 object ScattDBInit {
 
@@ -36,16 +36,11 @@ object ScattDBInit {
         case 2 => startRemoteSlaveSystem
       }
     }
-
-    val portNumber = ConfigurationProvider.getDefaultPort()
-    val serverSocket = new ServerSocket(portNumber)
-
-    SocketListener.init(serverSocket)
   }
 
   def startRemoteSlaveSystem = {
     val system = ActorSystem("SlaveSystem", ConfigFactory.load("slave"))
-    system.actorOf(Props[KeyValueActor], "selector")
+    system.actorOf(Props[DBActor], "selector")
 
     logger.debug("Started remote slave system.")
   }
@@ -55,7 +50,12 @@ object ScattDBInit {
 //    val actor = system.actorOf(Props(classOf[LookupActor], remotePath), "lookupActor")
     val remoteActor = system.actorSelection("akka.tcp://SlaveSystem@127.0.0.1:9001/user/selector")
 
-    logger.debug("Started remote lookup system.")
+    val portNumber = ConfigurationProvider.getDefaultPort()
+    val serverSocket = new ServerSocket(portNumber)
+
+    SocketListener.init(serverSocket)
+
+    logger.debug("Started master node.")
     this.remoteActor = remoteActor
   }
 
