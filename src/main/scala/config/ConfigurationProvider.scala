@@ -1,6 +1,9 @@
 package config
 
 import java.util.Properties
+import scala.collection.JavaConverters._
+
+import com.typesafe.config.ConfigFactory
 
 import scala.io.Source
 import scala.util.Try
@@ -12,12 +15,15 @@ object ConfigurationProvider {
   val defaultIsDbInMemEnabled = false
   val defaultKeyValuePrefix = "kv_"
   val defaultEntryPrefix = "entry_"
+  val hostsConfigPath = "hosts.conf"
+  val hostsPropertyPath = "scattdb.hosts"
 
   def getProperty(propertyName: String): String = {
 
     val configProperties = Source.fromResource("config.properties").bufferedReader()
     properties.load(configProperties)
     properties.getProperty(propertyName)
+
   }
 
   def getDefaultPort(): Int = Try(getProperty("scattdb.default.port").toInt).getOrElse(9966)
@@ -41,5 +47,10 @@ object ConfigurationProvider {
       case "slave" => 2
       case _ => 0
     }
+  }
+
+  def getHostsList(): List[String] = {
+    val hostsEntrySet = ConfigFactory.load(hostsConfigPath).getConfig(hostsPropertyPath).entrySet().asScala
+    List.empty[String] ++ (hostsEntrySet map (_.getValue.unwrapped().toString))
   }
 }

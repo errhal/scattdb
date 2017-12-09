@@ -9,15 +9,15 @@ import config.ConfigurationProvider
 import listeners.SocketListener
 import remote.master.LookupActor
 import remote.slave.DBActor
+import services.QueryService
 
 object ScattDBInit {
 
   val logger = Logger(this.getClass)
-  var remoteActor: ActorSelection = _
 
   def main(args: Array[String]) {
 
-    if(args.length > 1) {
+    if (args.length > 1) {
       args(1) match {
         case "master/slave" | "0" => {
           startRemoteSlaveSystem
@@ -28,10 +28,9 @@ object ScattDBInit {
       }
     } else {
       ConfigurationProvider.getServerType() match {
-        case 0 => {
+        case 0 =>
           startRemoteSlaveSystem
           startRemoteMasterSystem
-        }
         case 1 => startRemoteMasterSystem
         case 2 => startRemoteSlaveSystem
       }
@@ -47,8 +46,10 @@ object ScattDBInit {
 
   def startRemoteMasterSystem = {
     val system = ActorSystem("MasterSystem", ConfigFactory.load("master"))
-//    val actor = system.actorOf(Props(classOf[LookupActor], remotePath), "lookupActor")
-    val remoteActor = system.actorSelection("akka.tcp://SlaveSystem@127.0.0.1:9001/user/selector")
+    //    val actor = system.actorOf(Props(classOf[LookupActor], remotePath), "lookupActor")
+    for (actorPath <- ConfigurationProvider.getHostsList()) {
+      QueryService.actorRefs = QueryService.actorRefs.:+(system.actorSelection("akka.tcp://SlaveSystem@" + actorPath + "/user/selector"))
+    }
 
     val portNumber = ConfigurationProvider.getDefaultPort()
     val serverSocket = new ServerSocket(portNumber)
@@ -56,7 +57,6 @@ object ScattDBInit {
     SocketListener.init(serverSocket)
 
     logger.debug("Started master node.")
-    this.remoteActor = remoteActor
   }
 
 }

@@ -1,6 +1,8 @@
 package services
 
 
+import akka.actor.ActorSelection
+import akka.dispatch.Futures
 import init.ScattDBInit
 import managers.DatabaseManager
 import remote.operations._
@@ -11,6 +13,8 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable, Future}
 
 object QueryService {
+
+  var actorRefs = List.empty[ActorSelection]
 
   val keyStoreSelectPattern = "query\\[select[ ]+key\\(([A-Za-z0-9]+)\\)[ ]+from[ ]+([A-Za-z0-9]+)\\]"
   val keyStoreInsertPattern = "query\\[insert[ ]+key\\(([A-Za-z0-9]+)\\)[ ]+into[ ]+([A-Za-z0-9]+)[ ]+data\\(([^\\(\\)]+)\\)\\]"
@@ -39,7 +43,9 @@ object QueryService {
     val keyValue = keyStoreSelectPattern.r.findAllIn(message)
     val dataset = keyValue.group(2)
     val key = keyValue.group(1)
-    ScattDBInit.remoteActor ? SelectKeyValue(dataset, key)
+    var futures = List.empty[Future[Any]]
+    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectKeyValue(dataset, key))
+    futures.head
   }
 
   def putKeyValue(message: String): Future[Any] = {
@@ -47,7 +53,9 @@ object QueryService {
     val dataset = keyValue.group(2)
     val key = keyValue.group(1)
     val value = keyValue.group(3)
-    ScattDBInit.remoteActor ? InsertKeyValue(dataset, key, value)
+    var futures = List.empty[Future[Any]]
+    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertKeyValue(dataset, key, value))
+    futures.head
   }
 
   def getEntry(message: String): Future[Any] = {
@@ -55,14 +63,18 @@ object QueryService {
     val dataset = entryQuery.group(2)
     // TODO: passing entry query param
     val entry = entryQuery.group(1)
-    ScattDBInit.remoteActor ? SelectEntry(dataset)
+    var futures = List.empty[Future[Any]]
+    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectEntry(dataset))
+    futures.head
   }
 
   def putEntry(message: String): Future[Any] = {
     val entryQuery = entryStoreInsertPattern.r.findAllIn(message)
     val dataset = entryQuery.group(2)
     val entry = entryQuery.group(1)
-    ScattDBInit.remoteActor ? InsertEntry(dataset, entry)
+    var futures = List.empty[Future[Any]]
+    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertEntry(dataset, entry))
+    futures.head
   }
 
 }
