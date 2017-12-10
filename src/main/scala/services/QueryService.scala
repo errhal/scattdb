@@ -2,15 +2,14 @@ package services
 
 
 import akka.actor.ActorSelection
-import akka.dispatch.Futures
-import init.ScattDBInit
-import managers.DatabaseManager
 import remote.operations._
 import akka.pattern.ask
 import akka.util.Timeout
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable, Future}
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object QueryService {
 
@@ -45,7 +44,7 @@ object QueryService {
     val key = keyValue.group(1)
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectKeyValue(dataset, key))
-    futures.head
+    Future.sequence(futures)
   }
 
   def putKeyValue(message: String): Future[Any] = {
@@ -55,7 +54,7 @@ object QueryService {
     val value = keyValue.group(3)
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertKeyValue(dataset, key, value))
-    futures.head
+    Future.sequence(futures)
   }
 
   def getEntry(message: String): Future[Any] = {
@@ -65,7 +64,7 @@ object QueryService {
     val entry = entryQuery.group(1)
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectEntry(dataset))
-    futures.head
+    Future.sequence(futures)
   }
 
   def putEntry(message: String): Future[Any] = {
@@ -74,7 +73,7 @@ object QueryService {
     val entry = entryQuery.group(1)
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertEntry(dataset, entry))
-    futures.head
+    Future.sequence(futures)
   }
 
 }
