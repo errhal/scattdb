@@ -4,6 +4,7 @@ import java.io.{BufferedReader, InputStreamReader, PrintWriter}
 import java.net.{ServerSocket, Socket}
 
 import managers.DatabaseManager
+import remote.operations.{DbOp, DbResult, InsertResult, SelectResult}
 import services.{AuthenticationService, QueryService}
 
 import scala.concurrent.{Await, Awaitable, Future}
@@ -24,16 +25,14 @@ object SocketListener {
       val future = recognizeMessageType(input, clientSocketOut)
       import scala.concurrent.ExecutionContext.Implicits.global
       future onComplete {
-        case Success(result) => {
-          clientSocketOut.println(result)
+        case Success(result) =>
+          clientSocketOut.println(recognizeResponseType(result))
           clientSocketIn.close()
           clientSocket.close()
-        }
-        case Failure(t) => {
+        case Failure(t) =>
           clientSocketOut.println(t.getMessage)
           clientSocketIn.close()
           clientSocket.close()
-        }
       }
     }
   }
@@ -51,4 +50,12 @@ object SocketListener {
     }
   }
 
+  def recognizeResponseType(result: Any) = result match {
+    case l: List[_] if l.nonEmpty => l.head match {
+      case s: SelectResult => s.result
+      case i: InsertResult => i.result
+      case _ => "Malformed response from node."
+    }
+    case _ => "Received unsupported message"
+  }
 }
