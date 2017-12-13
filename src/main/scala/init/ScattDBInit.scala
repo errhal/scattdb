@@ -7,7 +7,6 @@ import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
 import config.ConfigurationProvider
 import listeners.SocketListener
-import remote.master.LookupActor
 import remote.slave.DBActor
 import services.QueryService
 

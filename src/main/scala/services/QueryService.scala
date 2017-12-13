@@ -8,7 +8,6 @@ import akka.util.Timeout
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable, Future}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object QueryService {
@@ -72,8 +71,12 @@ object QueryService {
     val dataset = entryQuery.group(2)
     val entry = entryQuery.group(1)
     var futures = List.empty[Future[Any]]
-    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertEntry(dataset, entry))
+    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertEntry(generateUUID, dataset, entry))
     Future.sequence(futures)
+  }
+
+  def generateUUID: String = {
+    java.util.UUID.randomUUID().toString.replaceAll("-", "")
   }
 
 }

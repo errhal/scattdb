@@ -1,5 +1,7 @@
 package remote.operations
 
+import scala.collection.concurrent.TrieMap
+
 trait DbOp
 
 final case class SelectKeyValue(dataset: String, key: String) extends DbOp
@@ -8,7 +10,7 @@ final case class InsertKeyValue(dataset: String, key: String, value: String) ext
 
 final case class SelectEntry(dataset: String) extends DbOp
 
-final case class InsertEntry(dataset: String, entry: String) extends DbOp
+final case class InsertEntry(uuid: String, dataset: String, entry: String) extends DbOp
 
 trait DbResult
 

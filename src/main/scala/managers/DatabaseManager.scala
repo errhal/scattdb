@@ -61,9 +61,9 @@ object DatabaseManager {
 
       val deserialized = objectMapper.readValue(file, classOf[JsonNode])
 
-      val trieMap = new TrieMap[Long, JsonNode]()
+      val trieMap = new TrieMap[String, JsonNode]()
       deserialized.fields().forEachRemaining((field) => {
-        trieMap += field.getKey.toLong -> field.getValue
+        trieMap += field.getKey -> field.getValue
       })
       EntryMemStore.entryDb += dataset -> trieMap
     })
@@ -138,20 +138,20 @@ object DatabaseManager {
     objectMapper.writeValueAsString(entry)
   }
 
-  def putEntry(dataset: String, entry: String): Boolean = {
+  def putEntry(uuid: String, dataset: String, entry: String): Boolean = {
     //TODO: persistence data
     val deserializedEntry = objectMapper.readValue(entry, classOf[JsonNode])
-    val isInserted = putEntryIntoMem(dataset, deserializedEntry)
+    val isInserted = putEntryIntoMem(uuid, dataset, deserializedEntry)
     if (isInserted) if (ConfigurationProvider.isEntryPersistenceEnabled()) persistEntry(dataset)
     isInserted
   }
 
-  def getEntryFromMem(dataset: String): scala.collection.concurrent.Map[Long, JsonNode] = {
+  def getEntryFromMem(dataset: String): scala.collection.concurrent.Map[String, JsonNode] = {
     EntryMemStore.getEntry(dataset)
   }
 
-  def putEntryIntoMem(dataset: String, entry: JsonNode): Boolean = {
-    EntryMemStore.putEntry(dataset, entry)
+  def putEntryIntoMem(uuid: String, dataset: String, entry: JsonNode): Boolean = {
+    EntryMemStore.putEntry(uuid, dataset, entry)
   }
 
   def persistEntry(dataset: String) = {
