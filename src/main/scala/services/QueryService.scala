@@ -1,14 +1,25 @@
 package services
 
 
+import java.util.StringTokenizer
+
 import akka.actor.ActorSelection
 import remote.operations._
 import akka.pattern.ask
 import akka.util.Timeout
+import org.antlr.v4.runtime.tree.ParseTreeWalker
+import org.antlr.v4.runtime.{ANTLRInputStream, CharStream, CharStreams, CommonTokenStream}
+import parser.impl.DefaultQueryListener
+import parser.{QueryBaseListener, QueryLexer, QueryListener, QueryParser}
+import tokens.Token
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.matching.Regex
+import scala.collection.JavaConverters._
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 object QueryService {
 
@@ -23,8 +34,16 @@ object QueryService {
 
   def parseQuery(message: String): Future[Any] = {
 
-    if (message.matches(keyStoreSelectPattern)) {
-      getKeyValue(message)
+    val lexer = new QueryLexer(CharStreams.fromString(message))
+    val parser = new QueryParser(new CommonTokenStream(lexer))
+
+    val tree = parser.queryStatement()
+    val listener = new DefaultQueryListener
+    ParseTreeWalker.DEFAULT.walk(listener, tree)
+
+
+    if (listener.isSelect && listener.isKeyValue) {
+      getKeyValue(listener.key, listener.dataset)
     } else if (message.matches(keyStoreInsertPattern)) {
       putKeyValue(message)
     } else if (message.matches(entryStoreSelectPattern)) {
@@ -36,11 +55,8 @@ object QueryService {
     }
   }
 
-  def getKeyValue(message: String): Future[Any] = {
+  def getKeyValue(key:String, dataset: String): Future[Any] = {
 
-    val keyValue = keyStoreSelectPattern.r.findAllIn(message)
-    val dataset = keyValue.group(2)
-    val key = keyValue.group(1)
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectKeyValue(dataset, key))
     Future.sequence(futures)
