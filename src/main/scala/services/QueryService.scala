@@ -25,8 +25,6 @@ object QueryService {
 
   var actorRefs = List.empty[ActorSelection]
 
-  val keyStoreSelectPattern = "query\\[select[ ]+key\\(([A-Za-z0-9]+)\\)[ ]+from[ ]+([A-Za-z0-9]+)\\]"
-  val keyStoreInsertPattern = "query\\[insert[ ]+key\\(([A-Za-z0-9]+)\\)[ ]+into[ ]+([A-Za-z0-9]+)[ ]+data\\(([^\\(\\)]+)\\)\\]"
   val entryStoreSelectPattern = "query\\[select[ ]+entry\\(([^\\(\\)]+)\\)[ ]+from[ ]+([A-Za-z0-9]+)\\]"
   val entryStoreInsertPattern = "query\\[insert[ ]+entry\\(([^\\(\\)]+)\\)[ ]+into[ ]+([A-Za-z0-9]+)\\]"
 
@@ -44,8 +42,8 @@ object QueryService {
 
     if (listener.isSelect && listener.isKeyValue) {
       getKeyValue(listener.key, listener.dataset)
-    } else if (message.matches(keyStoreInsertPattern)) {
-      putKeyValue(message)
+    } else if (listener.isInsert && listener.isKeyValue) {
+      putKeyValue(listener.key, listener.dataset, listener.data)
     } else if (message.matches(entryStoreSelectPattern)) {
       getEntry(message)
     } else if (message.matches(entryStoreInsertPattern)) {
@@ -55,20 +53,16 @@ object QueryService {
     }
   }
 
-  def getKeyValue(key:String, dataset: String): Future[Any] = {
+  def getKeyValue(key: String, dataset: String): Future[Any] = {
 
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectKeyValue(dataset, key))
     Future.sequence(futures)
   }
 
-  def putKeyValue(message: String): Future[Any] = {
-    val keyValue = keyStoreInsertPattern.r.findAllIn(message)
-    val dataset = keyValue.group(2)
-    val key = keyValue.group(1)
-    val value = keyValue.group(3)
+  def putKeyValue(key: String, dataset: String, data: String): Future[Any] = {
     var futures = List.empty[Future[Any]]
-    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertKeyValue(dataset, key, value))
+    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertKeyValue(dataset, key, data))
     Future.sequence(futures)
   }
 
