@@ -6,7 +6,7 @@ import java.net.Socket
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-object SelectStressTest {
+object SelectKVStressTest {
 
   val MAX_TIMEOUT = 3000
 
@@ -23,7 +23,7 @@ object SelectStressTest {
         val socket = new Socket("127.0.0.1", 7000)
         val reader = new BufferedReader(new InputStreamReader(socket.getInputStream))
         val printWriter = new PrintWriter(socket.getOutputStream, true)
-        printWriter.println("query[select key(key1) from db1]")
+        printWriter.println("query[select key(key" + i + ") from db1]")
         var r = reader.readLine()
         while (r != null) {
           r = reader.readLine()
@@ -44,5 +44,4 @@ object SelectStressTest {
 
     Thread.sleep(MAX_TIMEOUT)
   }
-
 }

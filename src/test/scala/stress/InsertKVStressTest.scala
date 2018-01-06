@@ -23,7 +23,7 @@ object InsertKVStressTest {
         val socket = new Socket("127.0.0.1", 7000)
         val reader = new BufferedReader(new InputStreamReader(socket.getInputStream))
         val printWriter = new PrintWriter(socket.getOutputStream, true)
-        printWriter.println("query[insert key(key1) into db1 data({\"data\":\"example1\"})]")
+        printWriter.println("query[insert key(key" + i + ") into db1 data({\"data\":\"example1\"})]")
         var r = reader.readLine()
         while (r != null) {
           r = reader.readLine()
