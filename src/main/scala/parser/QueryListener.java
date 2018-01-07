@@ -38,6 +38,26 @@ public interface QueryListener extends ParseTreeListener {
 	 */
 	void exitInsertKeyStatement(QueryParser.InsertKeyStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link QueryParser#selectEntryStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectEntryStatement(QueryParser.SelectEntryStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryParser#selectEntryStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectEntryStatement(QueryParser.SelectEntryStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link QueryParser#insertEntryStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterInsertEntryStatement(QueryParser.InsertEntryStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryParser#insertEntryStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitInsertEntryStatement(QueryParser.InsertEntryStatementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link QueryParser#dataVal}.
 	 * @param ctx the parse tree
 	 */

@@ -16,7 +16,6 @@ object EntryMemStore {
 
   def putEntry(uuid: String, dataset: String, entry: JsonNode): Boolean = {
     putLock.synchronized {
-
       val datasetMap = entryDb.get(dataset).orElse(Option.apply(new TrieMap[String, JsonNode])).get
       datasetMap += uuid -> entry
       entryDb += dataset -> datasetMap

@@ -1,15 +1,19 @@
 grammar Query;
 
-queryStatement : selectKeyStatement | insertKeyStatement;
+queryStatement : selectKeyStatement | insertKeyStatement | selectEntryStatement | insertEntryStatement;
 
 selectKeyStatement : QUERY '[' SELECT KEY '(' NAME ')' FROM NAME ']' ;
 insertKeyStatement : QUERY '[' INSERT KEY '(' NAME ')' INTO NAME dataVal ']' ;
+selectEntryStatement : QUERY '[' SELECT ENTRY '(' NAME ')' FROM NAME ']' ;
+insertEntryStatement : QUERY '[' INSERT ENTRY '(' json ')' INTO NAME ']' ;
+
 dataVal : 'data' '(' json ')' ;
 
 QUERY : 'query' ;
 SELECT : 'select' ;
 INSERT : 'insert' ;
 KEY : 'key' ;
+ENTRY : 'entry' ;
 INTO : 'into' ;
 FROM : 'from' ;
 

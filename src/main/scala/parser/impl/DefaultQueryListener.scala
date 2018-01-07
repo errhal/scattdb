@@ -9,10 +9,12 @@ class DefaultQueryListener extends QueryListener {
   var dataset = ""
   var key = ""
   var data = ""
+  var entry = ""
 
   var isSelect = false
   var isInsert = false
   var isKeyValue = false
+  var isEntry = false
 
 
   override def exitEveryRule(ctx: ParserRuleContext): Unit = {}
@@ -70,4 +72,21 @@ class DefaultQueryListener extends QueryListener {
   override def enterValue(ctx: QueryParser.ValueContext): Unit = {}
 
   override def exitValue(ctx: QueryParser.ValueContext): Unit = {}
+
+  override def enterSelectEntryStatement(ctx: QueryParser.SelectEntryStatementContext): Unit = {
+    isSelect = true
+    isEntry = true
+    dataset = ctx.NAME(1).getText
+  }
+
+  override def exitSelectEntryStatement(ctx: QueryParser.SelectEntryStatementContext): Unit = {}
+
+  override def enterInsertEntryStatement(ctx: QueryParser.InsertEntryStatementContext): Unit = {
+    isInsert = true
+    isEntry = true
+    entry = ctx.children.get(5).getText
+    dataset = ctx.children.get(8).getText
+  }
+
+  override def exitInsertEntryStatement(ctx: QueryParser.InsertEntryStatementContext): Unit = {}
 }

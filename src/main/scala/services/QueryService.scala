@@ -25,9 +25,6 @@ object QueryService {
 
   var actorRefs = List.empty[ActorSelection]
 
-  val entryStoreSelectPattern = "query\\[select[ ]+entry\\(([^\\(\\)]+)\\)[ ]+from[ ]+([A-Za-z0-9]+)\\]"
-  val entryStoreInsertPattern = "query\\[insert[ ]+entry\\(([^\\(\\)]+)\\)[ ]+into[ ]+([A-Za-z0-9]+)\\]"
-
   implicit val _ = Timeout(5 seconds)
 
   def parseQuery(message: String): Future[Any] = {
@@ -44,10 +41,11 @@ object QueryService {
       getKeyValue(listener.key, listener.dataset)
     } else if (listener.isInsert && listener.isKeyValue) {
       putKeyValue(listener.key, listener.dataset, listener.data)
-    } else if (message.matches(entryStoreSelectPattern)) {
-      getEntry(message)
-    } else if (message.matches(entryStoreInsertPattern)) {
-      putEntry(message)
+    } else if (listener.isSelect && listener.isEntry) {
+      // TODO: parsing entry query param
+      getEntry(listener.dataset)
+    } else if (listener.isInsert && listener.isEntry) {
+      putEntry(listener.dataset, listener.entry)
     } else {
       Future.failed(new IllegalArgumentException("Invalid query."))
     }
@@ -66,20 +64,13 @@ object QueryService {
     Future.sequence(futures)
   }
 
-  def getEntry(message: String): Future[Any] = {
-    val entryQuery = entryStoreSelectPattern.r.findAllIn(message)
-    val dataset = entryQuery.group(2)
-    // TODO: passing entry query param
-    val entry = entryQuery.group(1)
+  def getEntry(dataset: String): Future[Any] = {
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectEntry(dataset))
     Future.sequence(futures)
   }
 
-  def putEntry(message: String): Future[Any] = {
-    val entryQuery = entryStoreInsertPattern.r.findAllIn(message)
-    val dataset = entryQuery.group(2)
-    val entry = entryQuery.group(1)
+  def putEntry(dataset: String, entry: String): Future[Any] = {
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertEntry(generateUUID, dataset, entry))
     Future.sequence(futures)
