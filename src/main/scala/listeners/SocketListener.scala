@@ -39,7 +39,7 @@ object SocketListener {
 
   def recognizeMessageType(message: String, clientSocketOut: PrintWriter): Future[Any] = {
 
-    message.split("\\[")(0) match {
+    message.split("\\[")(0).toLowerCase match {
 //      TODO: change authentication to make async requests
 //      case "authentication" => if (!AuthenticationService.authenticate(message)) {
 //        clientSocketOut.println("Wrong account credentials! User not found")

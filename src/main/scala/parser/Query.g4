@@ -7,15 +7,16 @@ insertKeyStatement : QUERY '[' INSERT KEY '(' NAME ')' INTO NAME dataVal ']' ;
 selectEntryStatement : QUERY '[' SELECT ENTRY '(' NAME ')' FROM NAME ']' ;
 insertEntryStatement : QUERY '[' INSERT ENTRY '(' json ')' INTO NAME ']' ;
 
-dataVal : 'data' '(' json ')' ;
+dataVal : DATA '(' json ')' ;
 
-QUERY : 'query' ;
-SELECT : 'select' ;
-INSERT : 'insert' ;
-KEY : 'key' ;
-ENTRY : 'entry' ;
-INTO : 'into' ;
-FROM : 'from' ;
+QUERY : [qQ][uU][eE][rR][yY] ;
+SELECT : [sS][eE][lL][eE][cC][tT] ;
+INSERT : [iI][nN][sS][eE][rR][tT] ;
+KEY : [kK][eE][yY] ;
+ENTRY : [eE][nN][tT][rR][yY] ;
+INTO : [iI][nN][tT][oO] ;
+FROM : [fF][rR][oO][mM] ;
+DATA : [dD][aA][tT][aA] ;
 
 json
    : value
