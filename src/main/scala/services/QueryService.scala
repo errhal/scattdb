@@ -72,7 +72,8 @@ object QueryService {
 
   def putEntry(dataset: String, entry: String): Future[Any] = {
     var futures = List.empty[Future[Any]]
-    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertEntry(generateUUID, dataset, entry))
+    val dataUuid = generateUUID
+    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertEntry(dataUuid, dataset, entry))
     Future.sequence(futures)
   }
 
