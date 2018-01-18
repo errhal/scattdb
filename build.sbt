@@ -13,5 +13,7 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.2",
   "com.google.guava" % "guava" % "23.4-jre",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
-  "org.antlr" % "antlr4-runtime" % "4.7.1"
+  "org.antlr" % "antlr4-runtime" % "4.7.1",
+  "org.slf4j" % "slf4j-api" % "1.7.25",
+  "org.slf4j" % "slf4j-log4j12" % "1.7.25"
 )
