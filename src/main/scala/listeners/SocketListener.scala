@@ -1,16 +1,22 @@
 package listeners
 
 import java.io.{BufferedReader, InputStreamReader, PrintWriter}
-import java.net.{ServerSocket, Socket}
+import java.net.ServerSocket
 
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import managers.DatabaseManager
-import remote.operations.{DbOp, DbResult, InsertResult, SelectResult}
-import services.{AuthenticationService, QueryService}
+import remote.operations.{InsertResult, SelectResult}
+import services.QueryService
 
-import scala.concurrent.{Await, Awaitable, Future}
+import scala.collection.concurrent.TrieMap
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 object SocketListener {
+
+  val objectMapper = new ObjectMapper()
+  objectMapper.registerModule(DefaultScalaModule)
 
   def init(serverSocket: ServerSocket): Unit = {
 
@@ -40,19 +46,26 @@ object SocketListener {
   def recognizeMessageType(message: String, clientSocketOut: PrintWriter): Future[Any] = {
 
     message.split("\\[")(0).toLowerCase match {
-//      TODO: change authentication to make async requests
-//      case "authentication" => if (!AuthenticationService.authenticate(message)) {
-//        clientSocketOut.println("Wrong account credentials! User not found")
-//      } else {
-//        clientSocketOut.println("User successfully logged in")
-//      }
+      //      TODO: change authentication to make async requests
+      //      case "authentication" => if (!AuthenticationService.authenticate(message)) {
+      //        clientSocketOut.println("Wrong account credentials! User not found")
+      //      } else {
+      //        clientSocketOut.println("User successfully logged in")
+      //      }
       case "query" => QueryService.parseQuery(message)
     }
   }
 
   def recognizeResponseType(result: Any) = result match {
     case l: List[_] if l.nonEmpty => l.head match {
-      case s: SelectResult => s.result
+      case s: SelectResult => {
+        var result = new TrieMap[String, JsonNode]
+        for (slaveResult <- l) {
+          val deserializedEntry = objectMapper.readValue(slaveResult.asInstanceOf[SelectResult].result, classOf[Map[String, JsonNode]])
+          result ++= deserializedEntry
+        }
+        objectMapper.writeValueAsString(result)
+      }
       case i: InsertResult => i.result
       case _ => "Malformed response from node."
     }
