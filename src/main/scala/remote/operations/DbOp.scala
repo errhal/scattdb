@@ -1,7 +1,5 @@
 package remote.operations
 
-import scala.collection.concurrent.TrieMap
-
 trait DbOp
 
 final case class SelectKeyValue(dataset: String, key: String) extends DbOp

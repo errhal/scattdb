@@ -1,25 +1,17 @@
 package services
 
-
-import java.util.StringTokenizer
-
 import akka.actor.ActorSelection
 import remote.operations._
 import akka.pattern.ask
 import akka.util.Timeout
 import org.antlr.v4.runtime.tree.ParseTreeWalker
-import org.antlr.v4.runtime.{ANTLRInputStream, CharStream, CharStreams, CommonTokenStream}
+import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 import parser.impl.DefaultQueryListener
-import parser.{QueryBaseListener, QueryLexer, QueryListener, QueryParser}
-import tokens.Token
+import parser.{QueryLexer, QueryParser}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Awaitable, Future}
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.matching.Regex
-import scala.collection.JavaConverters._
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 object QueryService {
 

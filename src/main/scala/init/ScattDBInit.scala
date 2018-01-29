@@ -2,7 +2,7 @@ package init
 
 import java.net.ServerSocket
 
-import akka.actor.{ActorRef, ActorSelection, ActorSystem, Props}
+import akka.actor.{ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
 import config.ConfigurationProvider

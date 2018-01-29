@@ -1,8 +1,5 @@
 package stores
 
-import java.util.Comparator
-import java.util.concurrent.ConcurrentHashMap
-
 import com.fasterxml.jackson.databind.JsonNode
 
 import scala.collection.concurrent.TrieMap

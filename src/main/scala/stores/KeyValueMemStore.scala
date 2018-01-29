@@ -1,6 +1,6 @@
 package stores
 
-import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
+import java.util.concurrent.ConcurrentHashMap
 
 
 object KeyValueMemStore {
