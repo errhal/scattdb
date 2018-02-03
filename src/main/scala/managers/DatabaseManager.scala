@@ -87,8 +87,6 @@ object DatabaseManager {
     * @return serialized value
     */
   def getKey(dataset: String, key: String): String = {
-
-    if (!ConfigurationProvider.isKeyValuePersistenceEnabled()) throw new NotImplementedError()
     objectMapper.writeValueAsString(getValueFromMem(dataset, key))
   }
 
