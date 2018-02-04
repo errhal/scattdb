@@ -15,10 +15,10 @@ abstract class AbstractStressTest {
     implicit val ec = ExecutionContext.global
 
     if (args.length == 1) {
-      requestNumber = args(1).toInt
+      requestNumber = args(0).toInt
     } else if (args.length == 2) {
-      requestNumber = args(1).toInt
-      timeout = args(2).toInt
+      requestNumber = args(0).toInt
+      timeout = args(1).toInt
     }
 
     val futures = List.empty[Future[Any]]
