@@ -2,7 +2,7 @@ package init
 
 import java.net.ServerSocket
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorSelection, ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
 import config.ConfigurationProvider
@@ -19,7 +19,7 @@ object ScattDBInit {
     if (args.length > 1) {
       args(1) match {
         case "master/slave" | "0" => {
-          startRemoteSlaveSystem
+          startLocalSlaveSystem
           startRemoteMasterSystem
         }
         case "master" | "1" => startRemoteMasterSystem
@@ -28,12 +28,19 @@ object ScattDBInit {
     } else {
       ConfigurationProvider.getServerType() match {
         case 0 =>
-          startRemoteSlaveSystem
+          startLocalSlaveSystem
           startRemoteMasterSystem
         case 1 => startRemoteMasterSystem
         case 2 => startRemoteSlaveSystem
       }
     }
+  }
+
+  def startLocalSlaveSystem = {
+    val system = ActorSystem("SlaveSystem")
+    val actor = system.actorOf(Props[DBActor], "selector")
+    QueryService.actorRefs = QueryService.actorRefs.:+(system.actorSelection(actor.path))
+    logger.debug("Started local slave system.")
   }
 
   def startRemoteSlaveSystem = {
