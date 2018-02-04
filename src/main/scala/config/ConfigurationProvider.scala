@@ -1,9 +1,9 @@
 package config
 
 import java.util.Properties
-import scala.collection.JavaConverters._
 
-import com.typesafe.config.ConfigFactory
+import scala.collection.JavaConverters._
+import com.typesafe.config.{ConfigException, ConfigFactory}
 
 import scala.io.Source
 import scala.util.Try
@@ -50,7 +50,11 @@ object ConfigurationProvider {
   }
 
   def getHostsList(): List[String] = {
-    val hostsEntrySet = ConfigFactory.load(hostsConfigPath).getConfig(hostsPropertyPath).entrySet().asScala
-    List.empty[String] ++ (hostsEntrySet map (_.getValue.unwrapped().toString))
+    try {
+      val hostsEntrySet = ConfigFactory.load(hostsConfigPath).getConfig(hostsPropertyPath).entrySet().asScala
+      List.empty[String] ++ (hostsEntrySet map (_.getValue.unwrapped().toString))
+    } catch {
+      case e: ConfigException => List.empty[String]
+    }
   }
 }
