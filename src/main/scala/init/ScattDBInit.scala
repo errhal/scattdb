@@ -7,6 +7,7 @@ import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
 import config.ConfigurationProvider
 import listeners.SocketListener
+import org.apache.log4j.BasicConfigurator
 import remote.slave.DBActor
 import services.QueryService
 
@@ -15,6 +16,8 @@ object ScattDBInit {
   val logger = Logger(this.getClass)
 
   def main(args: Array[String]) {
+
+    BasicConfigurator.configure()
 
     if (args.length > 1) {
       args(1) match {
@@ -60,9 +63,9 @@ object ScattDBInit {
     val portNumber = ConfigurationProvider.getDefaultPort()
     val serverSocket = new ServerSocket(portNumber)
 
-    SocketListener.init(serverSocket)
-
     logger.debug("Started master node.")
+
+    SocketListener.init(serverSocket)
   }
 
 }
