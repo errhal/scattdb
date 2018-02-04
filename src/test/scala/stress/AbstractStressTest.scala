@@ -7,17 +7,25 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 abstract class AbstractStressTest {
-  val MAX_TIMEOUT = 3000
+  var timeout = 3000
+  var requestNumber = 1000
 
   def main(args: Array[String]) {
 
     implicit val ec = ExecutionContext.global
 
+    if (args.length == 1) {
+      requestNumber = args(1).toInt
+    } else if (args.length == 2) {
+      requestNumber = args(1).toInt
+      timeout = args(2).toInt
+    }
+
     val futures = List.empty[Future[Any]]
 
     val startTime = System.nanoTime()
 
-    for (i <- 1 to 1000) {
+    for (i <- 1 to requestNumber) {
       futures.:+(Future {
         try {
           val socket = new Socket("127.0.0.1", 7000)
@@ -47,7 +55,7 @@ abstract class AbstractStressTest {
       }
     })
 
-    Thread.sleep(MAX_TIMEOUT)
+    Thread.sleep(timeout)
   }
 
   def getQueryPattern(index: Integer): String
