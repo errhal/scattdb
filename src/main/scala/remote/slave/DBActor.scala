@@ -25,6 +25,12 @@ class DBActor extends Actor {
         case e: Exception => sender() ! Failure(e)
       }
     }
+    case DeleteKeyValue(dataset, key) =>
+      try {
+        sender() ! DeleteResult(DatabaseManager.deleteKey(dataset, key))
+      } catch {
+        case e: Exception => sender() ! Failure(e)
+      }
     case SelectEntry(dataset) => {
       try {
         sender() ! SelectResult(DatabaseManager.getEntry(dataset))

@@ -13,6 +13,7 @@ class DefaultQueryListener extends QueryListener {
 
   var isSelect = false
   var isInsert = false
+  var isDelete = false
   var isKeyValue = false
   var isEntry = false
 
@@ -41,11 +42,20 @@ class DefaultQueryListener extends QueryListener {
     dataset = ctx.NAME().get(1).getSymbol.getText
   }
 
+  override def exitInsertKeyStatement(ctx: QueryParser.InsertKeyStatementContext): Unit = {}
+
+  override def enterDeleteKeyStatement(ctx: QueryParser.DeleteKeyStatementContext): Unit = {
+    isDelete = true
+    isKeyValue = true
+    key = ctx.NAME().get(0).getSymbol.getText
+    dataset = ctx.NAME().get(1).getSymbol.getText
+  }
+
+  override def exitDeleteKeyStatement(ctx: QueryParser.DeleteKeyStatementContext): Unit = {}
+
   override def enterQueryStatement(ctx: QueryParser.QueryStatementContext): Unit = {}
 
   override def exitQueryStatement(ctx: QueryParser.QueryStatementContext): Unit = {}
-
-  override def exitInsertKeyStatement(ctx: QueryParser.InsertKeyStatementContext): Unit = {}
 
   override def enterDataVal(ctx: QueryParser.DataValContext): Unit = {}
 

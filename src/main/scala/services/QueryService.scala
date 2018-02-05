@@ -33,6 +33,8 @@ object QueryService {
       getKeyValue(listener.key, listener.dataset)
     } else if (listener.isInsert && listener.isKeyValue) {
       putKeyValue(listener.key, listener.dataset, listener.data)
+    } else if (listener.isDelete && listener.isKeyValue) {
+      deleteKeyValue(listener.key, listener.dataset)
     } else if (listener.isSelect && listener.isEntry) {
       // TODO: parsing entry query param
       getEntry(listener.dataset)
@@ -47,12 +49,19 @@ object QueryService {
 
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectKeyValue(dataset, key))
+    //    for (actorRef <- actorRefs) futures = futures.+:(Future {1})
     Future.sequence(futures)
   }
 
   def putKeyValue(key: String, dataset: String, data: String): Future[Any] = {
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertKeyValue(dataset, key, data))
+    Future.sequence(futures)
+  }
+
+  def deleteKeyValue(key: String, dataset: String): Future[Any] = {
+    var futures = List.empty[Future[Any]]
+    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? DeleteKeyValue(dataset, key))
     Future.sequence(futures)
   }
 

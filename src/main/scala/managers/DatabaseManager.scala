@@ -105,6 +105,10 @@ object DatabaseManager {
     isInserted
   }
 
+  def deleteKey(dataset: String, key: String): String = {
+    KeyValueMemStore.deleteValue(dataset, key)
+  }
+
   def getValueFromMem(data: String, key: String): AnyRef = {
     KeyValueMemStore.getValue(data, key)
   }
