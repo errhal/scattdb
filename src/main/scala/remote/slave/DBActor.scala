@@ -13,34 +13,34 @@ class DBActor extends Actor {
   def receive = {
     case SelectKeyValue(dataset, key) => {
       try {
-        sender() ! SelectResult(DatabaseManager.getKey(dataset, key))
+        sender() ! SelectEntryResult(DatabaseManager.getKey(dataset, key))
       } catch {
         case e: Exception => sender() ! Failure(e)
       }
     }
     case InsertKeyValue(dataset, key, value) => {
       try {
-        sender() ! InsertResult(DatabaseManager.putKey(dataset, key, value))
+        sender() ! InsertEntryResult(DatabaseManager.putKey(dataset, key, value))
       } catch {
         case e: Exception => sender() ! Failure(e)
       }
     }
     case DeleteKeyValue(dataset, key) =>
       try {
-        sender() ! DeleteResult(DatabaseManager.deleteKey(dataset, key))
+        sender() ! DeleteEntryResult(DatabaseManager.deleteKey(dataset, key))
       } catch {
         case e: Exception => sender() ! Failure(e)
       }
     case SelectEntry(dataset) => {
       try {
-        sender() ! SelectResult(DatabaseManager.getEntry(dataset))
+        sender() ! SelectEntryResult(DatabaseManager.getEntry(dataset))
       } catch {
         case e: Exception => sender() ! Failure(e)
       }
     }
     case InsertEntry(uuid, dataset, entry) => {
       try {
-        sender ! InsertResult(DatabaseManager.putEntry(uuid, dataset, entry))
+        sender ! InsertEntryResult(DatabaseManager.putEntry(uuid, dataset, entry))
       } catch {
         case e: Exception => sender ! Failure(e)
       }

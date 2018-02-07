@@ -3,7 +3,7 @@ package remote.master
 import scala.concurrent.duration._
 import akka.actor.{Actor, ActorIdentity, ActorRef, Identify, ReceiveTimeout, Terminated}
 import com.typesafe.scalalogging.Logger
-import remote.operations.{DbOp, DbResult, SelectResult}
+import remote.operations.{DbOp, DbResult, SelectEntryResult}
 
 class LookupActor(path: String) extends Actor {
 
@@ -31,7 +31,7 @@ class LookupActor(path: String) extends Actor {
   def active(actor: ActorRef): Actor.Receive = {
     case op: DbOp => actor ! op
     case dbResult: DbResult => dbResult match {
-      case SelectResult(result) =>
+      case SelectEntryResult(result) =>
         logger.debug("Select result:\n{}", result.toString)
     }
     case Terminated(`actor`) =>

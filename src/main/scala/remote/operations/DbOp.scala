@@ -14,8 +14,14 @@ final case class InsertEntry(uuid: String, dataset: String, entry: String) exten
 
 trait DbResult
 
-final case class SelectResult(result: String) extends DbResult
+final case class SelectKeyResult(result: String) extends DbResult
 
-final case class InsertResult(result: Boolean) extends DbResult
+final case class InsertKeyResult(result: String) extends DbResult
 
-final case class DeleteResult(result: String) extends DbResult
+final case class DeleteKeyResult(result: String) extends DbResult
+
+final case class SelectEntryResult(result: String) extends DbResult
+
+final case class InsertEntryResult(result: Boolean) extends DbResult
+
+final case class DeleteEntryResult(result: String) extends DbResult
