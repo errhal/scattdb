@@ -88,6 +88,18 @@ public class QueryBaseListener implements QueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterDeleteEntryStatement(QueryParser.DeleteEntryStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDeleteEntryStatement(QueryParser.DeleteEntryStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDataVal(QueryParser.DataValContext ctx) { }
 	/**
 	 * {@inheritDoc}

@@ -12,6 +12,8 @@ final case class SelectEntry(dataset: String) extends DbOp
 
 final case class InsertEntry(uuid: String, dataset: String, entry: String) extends DbOp
 
+final case class DeleteEntry(dataset: String) extends DbOp
+
 trait DbResult
 
 final case class SelectKeyResult(result: String) extends DbResult

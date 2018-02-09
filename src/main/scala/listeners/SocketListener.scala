@@ -6,13 +6,12 @@ import java.net.ServerSocket
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import managers.DatabaseManager
-import remote.operations.{InsertEntryResult, SelectEntryResult}
+import remote.operations._
 import services.QueryService
 
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-
 import ExecutionContext.Implicits.global
 
 object SocketListener {
@@ -66,15 +65,18 @@ object SocketListener {
 
   def recognizeResponseType(result: Any) = result match {
     case l: List[_] if l.nonEmpty => l.head match {
-      case s: SelectEntryResult => {
+      case s: SelectKeyResult => s
+      case i: InsertKeyResult => i
+      case d: DeleteKeyResult => d
+      case s: SelectEntryResult =>
         var result = new TrieMap[String, JsonNode]
         for (slaveResult <- l) {
           val deserializedEntry = objectMapper.readValue(slaveResult.asInstanceOf[SelectEntryResult].result, classOf[Map[String, JsonNode]])
           result ++= deserializedEntry
         }
         objectMapper.writeValueAsString(result)
-      }
-      case i: InsertEntryResult => i.result
+      case i: InsertEntryResult => i
+      case d: DeleteEntryResult => d
       case _ => "Malformed response from node."
     }
     case _ => "Received unsupported message"

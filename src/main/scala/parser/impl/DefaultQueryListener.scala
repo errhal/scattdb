@@ -99,4 +99,12 @@ class DefaultQueryListener extends QueryListener {
   }
 
   override def exitInsertEntryStatement(ctx: QueryParser.InsertEntryStatementContext): Unit = {}
+
+  override def enterDeleteEntryStatement(ctx: QueryParser.DeleteEntryStatementContext): Unit = {
+    isDelete = true
+    isEntry = true
+    dataset = ctx.NAME.getText
+  }
+
+  override def exitDeleteEntryStatement(ctx: QueryParser.DeleteEntryStatementContext): Unit = {}
 }

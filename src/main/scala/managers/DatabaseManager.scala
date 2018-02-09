@@ -98,11 +98,11 @@ object DatabaseManager {
     * @param value   we want to put
     * @return true if value was successfully inserted, false otherwise
     */
-  def putKey(dataset: String, key: String, value: String): Boolean = {
+  def putKey(dataset: String, key: String, value: String): String = {
     val deserialized = objectMapper.readValue(value, classOf[JsonNode])
     val isInserted = KeyValueMemStore.putValue(dataset, key, deserialized)
     if (isInserted) if (ConfigurationProvider.isKeyValuePersistenceEnabled()) persistKeyValue(dataset)
-    isInserted
+    isInserted.toString
   }
 
   def deleteKey(dataset: String, key: String): String = {
@@ -148,12 +148,21 @@ object DatabaseManager {
     isInserted
   }
 
+  def deleteEntry(dataset: String): String = {
+    // TODO: persistence data
+    deleteEntryFromMem(dataset)
+  }
+
   def getEntryFromMem(dataset: String): scala.collection.concurrent.Map[String, JsonNode] = {
     EntryMemStore.getEntry(dataset)
   }
 
   def putEntryIntoMem(uuid: String, dataset: String, entry: JsonNode): Boolean = {
     EntryMemStore.putEntry(uuid, dataset, entry)
+  }
+
+  def deleteEntryFromMem(dataset: String): String = {
+    EntryMemStore.deleteEntry(dataset)
   }
 
   def persistEntry(dataset: String) = {

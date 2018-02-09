@@ -40,6 +40,8 @@ object QueryService {
       getEntry(listener.dataset)
     } else if (listener.isInsert && listener.isEntry) {
       putEntry(listener.dataset, listener.entry)
+    } else if (listener.isDelete && listener.isEntry) {
+      deleteEntry(listener.dataset)
     } else {
       Future.failed(new IllegalArgumentException("Invalid query."))
     }
@@ -75,6 +77,12 @@ object QueryService {
     var futures = List.empty[Future[Any]]
     val dataUuid = generateUUID
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertEntry(dataUuid, dataset, entry))
+    Future.sequence(futures)
+  }
+
+  def deleteEntry(dataset: String): Future[Any] = {
+    var futures = List.empty[Future[Any]]
+    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? DeleteEntry(dataset))
     Future.sequence(futures)
   }
 

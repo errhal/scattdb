@@ -11,38 +11,40 @@ class DBActor extends Actor {
   val logger = Logger(classOf[DBActor])
 
   def receive = {
-    case SelectKeyValue(dataset, key) => {
+    case SelectKeyValue(dataset, key) =>
       try {
-        sender() ! SelectEntryResult(DatabaseManager.getKey(dataset, key))
+        sender() ! SelectKeyResult(DatabaseManager.getKey(dataset, key))
       } catch {
         case e: Exception => sender() ! Failure(e)
       }
-    }
-    case InsertKeyValue(dataset, key, value) => {
+    case InsertKeyValue(dataset, key, value) =>
       try {
-        sender() ! InsertEntryResult(DatabaseManager.putKey(dataset, key, value))
+        sender() ! InsertKeyResult(DatabaseManager.putKey(dataset, key, value))
       } catch {
         case e: Exception => sender() ! Failure(e)
       }
-    }
     case DeleteKeyValue(dataset, key) =>
       try {
         sender() ! DeleteEntryResult(DatabaseManager.deleteKey(dataset, key))
       } catch {
         case e: Exception => sender() ! Failure(e)
       }
-    case SelectEntry(dataset) => {
+    case SelectEntry(dataset) =>
       try {
         sender() ! SelectEntryResult(DatabaseManager.getEntry(dataset))
       } catch {
         case e: Exception => sender() ! Failure(e)
       }
-    }
     case InsertEntry(uuid, dataset, entry) => {
       try {
         sender ! InsertEntryResult(DatabaseManager.putEntry(uuid, dataset, entry))
       } catch {
         case e: Exception => sender ! Failure(e)
+      }
+    }
+    case DeleteEntry(dataset) => {
+      try {
+        sender ! DeleteEntryResult(DatabaseManager.deleteEntry(dataset))
       }
     }
   }

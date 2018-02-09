@@ -1,6 +1,7 @@
 grammar Query;
 
-queryStatement : selectKeyStatement | insertKeyStatement | deleteKeyStatement | selectEntryStatement | insertEntryStatement;
+queryStatement : selectKeyStatement | insertKeyStatement | deleteKeyStatement
+                | selectEntryStatement | insertEntryStatement | deleteEntryStatement ;
 
 selectKeyStatement : QUERY '[' SELECT KEY '(' NAME ')' FROM NAME ']' ;
 insertKeyStatement : QUERY '[' INSERT KEY '(' NAME ')' INTO NAME dataVal ']' ;
@@ -8,6 +9,7 @@ deleteKeyStatement : QUERY '[' DELETE KEY '(' NAME ')' FROM NAME ']' ;
 
 selectEntryStatement : QUERY '[' SELECT ENTRY '(' NAME ')' FROM NAME ']' ;
 insertEntryStatement : QUERY '[' INSERT ENTRY '(' json ')' INTO NAME ']' ;
+deleteEntryStatement : QUERY '[' DELETE ENTRY FROM NAME ']' ;
 
 dataVal : DATA '(' json ')' ;
 
