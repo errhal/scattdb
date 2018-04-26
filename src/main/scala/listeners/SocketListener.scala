@@ -1,10 +1,12 @@
 package listeners
 
-import java.io.{BufferedReader, InputStreamReader, PrintWriter}
-import java.net.ServerSocket
+import java.io._
+import java.net.{ServerSocket, Socket}
 
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import enums.SocketMessageType
+import enums.SocketMessageType.SocketMessageType
 import managers.DatabaseManager
 import remote.operations._
 import services.QueryService
@@ -12,7 +14,8 @@ import services.QueryService
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-import ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 object SocketListener {
 
@@ -30,27 +33,35 @@ object SocketListener {
 
         val input = clientSocketIn.readLine()
         // recognize one message per line
-        val future = recognizeMessageType(input, clientSocketOut)
-        import scala.concurrent.ExecutionContext.Implicits.global
-        future onComplete {
-          case Success(result) =>
-            clientSocketOut.println(recognizeResponseType(result))
-            clientSocketIn.close()
-            clientSocket.close()
-          case Failure(t) =>
-            clientSocketOut.println(t.getMessage)
-            clientSocketIn.close()
-            clientSocket.close()
+        val socketMessageType = recognizeMessageType(input, clientSocketOut)
+        if (socketMessageType == SocketMessageType.INVALID) {
+          sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, "Invalid socket message format")
+        } else if (socketMessageType == SocketMessageType.QUERY) {
+          val responseFuture = QueryService.parseQuery(input)
+          responseFuture onComplete {
+            case Success(result) =>
+              sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, recognizeResponseType(result))
+            case Failure(t) =>
+              clientSocketOut.println(t.getMessage)
+              clientSocketIn.close()
+              clientSocket.close()
+          }
         }
       }
     }
   }
 
-  def recognizeMessageType(message: String, clientSocketOut: PrintWriter): Future[Any] = {
+  def sendMessageCloseSocket(clientSocket: Socket, clientSocketIn: Reader, clientSocketOut: PrintWriter, msg: Any) = {
+    clientSocketOut.println(msg)
+    clientSocketIn.close()
+    clientSocket.close()
+  }
+
+  def recognizeMessageType(message: String, clientSocketOut: PrintWriter): SocketMessageType = {
 
     import ExecutionContext.Implicits.global
     if (message == null || message.split("\\[")(0) == null) {
-      return Future {}
+      return SocketMessageType.INVALID
     }
     message.split("\\[")(0).toLowerCase match {
       //      TODO: change authentication to make async requests
@@ -59,7 +70,8 @@ object SocketListener {
       //      } else {
       //        clientSocketOut.println("User successfully logged in")
       //      }
-      case "query" => QueryService.parseQuery(message)
+      case "query" => SocketMessageType.QUERY
+      case _ => SocketMessageType.INVALID
     }
   }
 

@@ -8,6 +8,8 @@ object Client {
   val defaultPortNumber = 7000
   val defaultIPNumber = "127.0.0.1"
 
+  val messageQueryFormat = "query[%s]"
+
   def main(args: Array[String]) {
 
     println("Welcome to the ScattDB console.")
@@ -27,7 +29,7 @@ Defaults:
         val socket = new Socket(ip, port)
         val reader = new BufferedReader(new InputStreamReader(socket.getInputStream))
         val printWriter = new PrintWriter(socket.getOutputStream, true)
-        printWriter.println(query)
+        printWriter.println(messageQueryFormat.format(query))
         println(reader.readLine())
       } catch {
         case _: ConnectException =>

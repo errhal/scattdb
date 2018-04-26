@@ -35,17 +35,15 @@ class DBActor extends Actor {
       } catch {
         case e: Exception => sender() ! Failure(e)
       }
-    case InsertEntry(uuid, dataset, entry) => {
+    case InsertEntry(uuid, dataset, entry) =>
       try {
         sender ! InsertEntryResult(DatabaseManager.putEntry(uuid, dataset, entry))
       } catch {
         case e: Exception => sender ! Failure(e)
       }
-    }
-    case DeleteEntry(dataset) => {
+    case DeleteEntry(dataset) =>
       try {
         sender ! DeleteEntryResult(DatabaseManager.deleteEntry(dataset))
       }
-    }
   }
 }
