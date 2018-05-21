@@ -58,6 +58,16 @@ public interface QueryListener extends ParseTreeListener {
 	 */
 	void exitSelectEntryStatement(QueryParser.SelectEntryStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link QueryParser#selectEntryStatementWithWhere}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectEntryStatementWithWhere(QueryParser.SelectEntryStatementWithWhereContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryParser#selectEntryStatementWithWhere}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectEntryStatementWithWhere(QueryParser.SelectEntryStatementWithWhereContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link QueryParser#insertEntryStatement}.
 	 * @param ctx the parse tree
 	 */
@@ -77,6 +87,120 @@ public interface QueryListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDeleteEntryStatement(QueryParser.DeleteEntryStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code binaryExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBinaryExpression(QueryParser.BinaryExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code binaryExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBinaryExpression(QueryParser.BinaryExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code decimalExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterDecimalExpression(QueryParser.DecimalExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code decimalExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitDecimalExpression(QueryParser.DecimalExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code boolExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBoolExpression(QueryParser.BoolExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code boolExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBoolExpression(QueryParser.BoolExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code identifierExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdentifierExpression(QueryParser.IdentifierExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code identifierExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdentifierExpression(QueryParser.IdentifierExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code notExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterNotExpression(QueryParser.NotExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code notExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitNotExpression(QueryParser.NotExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code parenExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterParenExpression(QueryParser.ParenExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code parenExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitParenExpression(QueryParser.ParenExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code comparatorExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterComparatorExpression(QueryParser.ComparatorExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code comparatorExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitComparatorExpression(QueryParser.ComparatorExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link QueryParser#comparator}.
+	 * @param ctx the parse tree
+	 */
+	void enterComparator(QueryParser.ComparatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryParser#comparator}.
+	 * @param ctx the parse tree
+	 */
+	void exitComparator(QueryParser.ComparatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link QueryParser#binary}.
+	 * @param ctx the parse tree
+	 */
+	void enterBinary(QueryParser.BinaryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryParser#binary}.
+	 * @param ctx the parse tree
+	 */
+	void exitBinary(QueryParser.BinaryContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link QueryParser#bool}.
+	 * @param ctx the parse tree
+	 */
+	void enterBool(QueryParser.BoolContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryParser#bool}.
+	 * @param ctx the parse tree
+	 */
+	void exitBool(QueryParser.BoolContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link QueryParser#dataVal}.
 	 * @param ctx the parse tree

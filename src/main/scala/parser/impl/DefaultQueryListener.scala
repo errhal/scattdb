@@ -29,8 +29,8 @@ class DefaultQueryListener extends QueryListener {
   override def enterSelectKeyStatement(ctx: QueryParser.SelectKeyStatementContext): Unit = {
     isSelect = true
     isKeyValue = true
-    key = ctx.NAME().get(0).getSymbol.getText
-    dataset = ctx.NAME().get(1).getSymbol.getText
+    key = ctx.IDENTIFIER().get(0).getSymbol.getText
+    dataset = ctx.IDENTIFIER().get(1).getSymbol.getText
   }
 
   override def exitSelectKeyStatement(ctx: QueryParser.SelectKeyStatementContext): Unit = {}
@@ -38,8 +38,8 @@ class DefaultQueryListener extends QueryListener {
   override def enterInsertKeyStatement(ctx: QueryParser.InsertKeyStatementContext): Unit = {
     isInsert = true
     isKeyValue = true
-    key = ctx.NAME().get(0).getSymbol.getText
-    dataset = ctx.NAME().get(1).getSymbol.getText
+    key = ctx.IDENTIFIER().get(0).getSymbol.getText
+    dataset = ctx.IDENTIFIER().get(1).getSymbol.getText
   }
 
   override def exitInsertKeyStatement(ctx: QueryParser.InsertKeyStatementContext): Unit = {}
@@ -47,8 +47,8 @@ class DefaultQueryListener extends QueryListener {
   override def enterDeleteKeyStatement(ctx: QueryParser.DeleteKeyStatementContext): Unit = {
     isDelete = true
     isKeyValue = true
-    key = ctx.NAME().get(0).getSymbol.getText
-    dataset = ctx.NAME().get(1).getSymbol.getText
+    key = ctx.IDENTIFIER().get(0).getSymbol.getText
+    dataset = ctx.IDENTIFIER().get(1).getSymbol.getText
   }
 
   override def exitDeleteKeyStatement(ctx: QueryParser.DeleteKeyStatementContext): Unit = {}
@@ -86,7 +86,7 @@ class DefaultQueryListener extends QueryListener {
   override def enterSelectEntryStatement(ctx: QueryParser.SelectEntryStatementContext): Unit = {
     isSelect = true
     isEntry = true
-    dataset = ctx.NAME(1).getText
+    dataset = ctx.IDENTIFIER(1).getText
   }
 
   override def exitSelectEntryStatement(ctx: QueryParser.SelectEntryStatementContext): Unit = {}
@@ -103,8 +103,52 @@ class DefaultQueryListener extends QueryListener {
   override def enterDeleteEntryStatement(ctx: QueryParser.DeleteEntryStatementContext): Unit = {
     isDelete = true
     isEntry = true
-    dataset = ctx.NAME.getText
+    dataset = ctx.IDENTIFIER.getText
   }
 
   override def exitDeleteEntryStatement(ctx: QueryParser.DeleteEntryStatementContext): Unit = {}
+
+  override def enterSelectEntryStatementWithWhere(ctx: QueryParser.SelectEntryStatementWithWhereContext): Unit = ???
+
+  override def exitSelectEntryStatementWithWhere(ctx: QueryParser.SelectEntryStatementWithWhereContext): Unit = ???
+
+  override def enterBinaryExpression(ctx: QueryParser.BinaryExpressionContext): Unit = ???
+
+  override def exitBinaryExpression(ctx: QueryParser.BinaryExpressionContext): Unit = ???
+
+  override def enterDecimalExpression(ctx: QueryParser.DecimalExpressionContext): Unit = ???
+
+  override def exitDecimalExpression(ctx: QueryParser.DecimalExpressionContext): Unit = ???
+
+  override def enterBoolExpression(ctx: QueryParser.BoolExpressionContext): Unit = ???
+
+  override def exitBoolExpression(ctx: QueryParser.BoolExpressionContext): Unit = ???
+
+  override def enterIdentifierExpression(ctx: QueryParser.IdentifierExpressionContext): Unit = ???
+
+  override def exitIdentifierExpression(ctx: QueryParser.IdentifierExpressionContext): Unit = ???
+
+  override def enterNotExpression(ctx: QueryParser.NotExpressionContext): Unit = ???
+
+  override def exitNotExpression(ctx: QueryParser.NotExpressionContext): Unit = ???
+
+  override def enterParenExpression(ctx: QueryParser.ParenExpressionContext): Unit = ???
+
+  override def exitParenExpression(ctx: QueryParser.ParenExpressionContext): Unit = ???
+
+  override def enterComparatorExpression(ctx: QueryParser.ComparatorExpressionContext): Unit = ???
+
+  override def exitComparatorExpression(ctx: QueryParser.ComparatorExpressionContext): Unit = ???
+
+  override def enterComparator(ctx: QueryParser.ComparatorContext): Unit = ???
+
+  override def exitComparator(ctx: QueryParser.ComparatorContext): Unit = ???
+
+  override def enterBinary(ctx: QueryParser.BinaryContext): Unit = ???
+
+  override def exitBinary(ctx: QueryParser.BinaryContext): Unit = ???
+
+  override def enterBool(ctx: QueryParser.BoolContext): Unit = ???
+
+  override def exitBool(ctx: QueryParser.BoolContext): Unit = ???
 }
