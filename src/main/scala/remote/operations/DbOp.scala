@@ -10,6 +10,8 @@ final case class DeleteKeyValue(dataset: String, key: String) extends DbOp
 
 final case class SelectEntry(dataset: String) extends DbOp
 
+final case class SelectEntryWithWhere(query: String) extends DbOp
+
 final case class InsertEntry(uuid: String, dataset: String, entry: String) extends DbOp
 
 final case class DeleteEntry(dataset: String) extends DbOp

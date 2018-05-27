@@ -6,7 +6,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
-import parser.impl.DefaultQueryListener
+import parser.impl.DefaultQueryVisitor
 import parser.{QueryLexer, QueryParser}
 
 import scala.concurrent.duration._
@@ -25,23 +25,25 @@ object QueryService {
     val parser = new QueryParser(new CommonTokenStream(lexer))
 
     val tree = parser.queryStatement()
-    val listener = new DefaultQueryListener
-    ParseTreeWalker.DEFAULT.walk(listener, tree)
+    val visitor = new DefaultQueryVisitor
+    val result = visitor.visit(tree)
+    println(result)
 
-
-    if (listener.isSelect && listener.isKeyValue) {
-      getKeyValue(listener.key, listener.dataset)
-    } else if (listener.isInsert && listener.isKeyValue) {
-      putKeyValue(listener.key, listener.dataset, listener.data)
-    } else if (listener.isDelete && listener.isKeyValue) {
-      deleteKeyValue(listener.key, listener.dataset)
-    } else if (listener.isSelect && listener.isEntry) {
+    if (visitor.isSelect && visitor.isKeyValue) {
+      getKeyValue(visitor.key, visitor.dataset)
+    } else if (visitor.isInsert && visitor.isKeyValue) {
+      putKeyValue(visitor.key, visitor.dataset, visitor.data)
+    } else if (visitor.isDelete && visitor.isKeyValue) {
+      deleteKeyValue(visitor.key, visitor.dataset)
+    } else if (visitor.isSelect && visitor.isEntry) {
       // TODO: parsing entry query param
-      getEntry(listener.dataset)
-    } else if (listener.isInsert && listener.isEntry) {
-      putEntry(listener.dataset, listener.entry)
-    } else if (listener.isDelete && listener.isEntry) {
-      deleteEntry(listener.dataset)
+      getEntry(visitor.dataset)
+    } else if (visitor.isSelect && visitor.isEntry && visitor.whereClause) {
+      getEntryWhereClause(message)
+    } else if (visitor.isInsert && visitor.isEntry) {
+      putEntry(visitor.dataset, visitor.entry)
+    } else if (visitor.isDelete && visitor.isEntry) {
+      deleteEntry(visitor.dataset)
     } else {
       Future.failed(new IllegalArgumentException("Invalid query."))
     }
@@ -70,6 +72,12 @@ object QueryService {
   def getEntry(dataset: String): Future[Any] = {
     var futures = List.empty[Future[Any]]
     for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectEntry(dataset))
+    Future.sequence(futures)
+  }
+
+  def getEntryWhereClause(message: String): Future[Any] = {
+    var futures = List.empty[Future[Any]]
+    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectEntryWithWhere(message))
     Future.sequence(futures)
   }
 
