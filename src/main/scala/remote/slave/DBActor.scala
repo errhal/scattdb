@@ -4,7 +4,11 @@ import akka.actor.Actor
 import akka.actor.Status.Failure
 import com.typesafe.scalalogging.Logger
 import managers.DatabaseManager
+import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
+import parser.{QueryLexer, QueryParser}
+import parser.impl.DefaultQueryVisitor
 import remote.operations._
+import scala.collection.JavaConverters._
 
 class DBActor extends Actor {
 
@@ -32,6 +36,18 @@ class DBActor extends Actor {
     case SelectEntry(dataset) =>
       try {
         sender() ! SelectEntryResult(DatabaseManager.getEntry(dataset))
+      } catch {
+        case e: Exception => sender() ! Failure(e)
+      }
+    case SelectEntryWithWhere(message) =>
+      try {
+        val lexer = new QueryLexer(CharStreams.fromString(message))
+        val parser = new QueryParser(new CommonTokenStream(lexer))
+
+        val tree = parser.queryStatement()
+        val defaultQueryVisitor = new DefaultQueryVisitor
+        val result = defaultQueryVisitor.visitQueryStatement(tree)
+        sender() ! SelectEntryResult(result.asInstanceOf[Map[String, AnyRef]].asJava.toString)
       } catch {
         case e: Exception => sender() ! Failure(e)
       }

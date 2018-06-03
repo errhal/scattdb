@@ -1,12 +1,17 @@
 package parser.impl
 
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import managers.DatabaseManager
+import org.antlr.v4.runtime.tree.ParseTree
 import parser.{QueryBaseVisitor, QueryParser}
+import collection.JavaConverters._
 
 /**
   * Created by Kamil Radziszewski on 27.05.18.
   */
 class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
+
+  val objectMapper = new ObjectMapper
 
   var dataset = ""
   var key = ""
@@ -20,11 +25,8 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
   var isEntry = false
   var whereClause = false
 
-  var queriedData:AnyRef = Map()
-
-  override def visitQueryStatement(ctx: QueryParser.QueryStatementContext): AnyRef = {
-    super.visitQueryStatement(ctx)
-  }
+  var queriedData: Map[String, AnyRef] = _
+  var booleanResult: Map[String, Boolean] = Map()
 
   override def visitSelectKeyStatement(ctx: QueryParser.SelectKeyStatementContext): AnyRef = {
     isSelect = true
@@ -58,9 +60,15 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
   }
 
   override def visitSelectEntryStatementWithWhere(ctx: QueryParser.SelectEntryStatementWithWhereContext): AnyRef = {
+    isSelect = true
+    isEntry = true
+    whereClause = true
     dataset = ctx.IDENTIFIER(1).getText
-    queriedData = DatabaseManager.getEntry(dataset)
-    super.visitSelectEntryStatementWithWhere(ctx)
+    val serializedData = DatabaseManager.getEntry(dataset)
+    val deserializedJavaMap = objectMapper.readValue(serializedData, classOf[java.util.Map[String, AnyRef]])
+    queriedData = Map(deserializedJavaMap.asScala.toSeq: _*)
+    booleanResult = queriedData.map((k) => k._1 -> false)
+    super.visit(ctx.whereExpression())
   }
 
   override def visitInsertEntryStatement(ctx: QueryParser.InsertEntryStatementContext): AnyRef = {
@@ -78,8 +86,60 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
     super.visitDeleteEntryStatement(ctx)
   }
 
+  override def visitBinaryExpression(ctx: QueryParser.BinaryExpressionContext): AnyRef = {
+    if (ctx.op.AND() != null) {
+      ctx.left.asInstanceOf[Map[String, Boolean]].map(k => k._1 -> (k._2 && ctx.right.asInstanceOf[Map[String, Boolean]](k._1)))
+    } else if (ctx.op.OR() != null) {
+      ctx.left.asInstanceOf[Map[String, Boolean]].map(k => k._1 -> (k._2 || ctx.right.asInstanceOf[Map[String, Boolean]](k._1)))
+    } else {
+      throw new IllegalArgumentException("Binary operator not implemented: " + ctx.op.getText)
+    }
+  }
+
+  override def visitDecimalExpression(ctx: QueryParser.DecimalExpressionContext): AnyRef = {
+    queriedData.map(k => k._1 -> ctx.DECIMAL().getText.toDouble)
+  }
+
+  override def visitBoolExpression(ctx: QueryParser.BoolExpressionContext): AnyRef = {
+    queriedData.map(k => k._1 -> ctx.getText.toBoolean)
+  }
+
+  override def visitIdentifierExpression(ctx: QueryParser.IdentifierExpressionContext): AnyRef = {
+    val id = ctx.IDENTIFIER().getText
+    queriedData.map(m => {
+      if (m._2.asInstanceOf[java.util.Map[AnyRef, AnyRef]].containsKey(id)) {
+        m._1 -> m._2.asInstanceOf[java.util.Map[AnyRef, AnyRef]].get(id)
+      } else {
+        m._1 -> null
+      }
+    })
+  }
+
+  override def visitNotExpression(ctx: QueryParser.NotExpressionContext): AnyRef = {
+    this.visit(ctx.whereExpression()).asInstanceOf[Map[String, Boolean]].map(k => k._1 -> !k._2)
+  }
+
+  override def visitParenExpression(ctx: QueryParser.ParenExpressionContext): AnyRef = {
+    super.visitParenExpression(ctx)
+  }
+
+  override def visitComparatorExpression(ctx: QueryParser.ComparatorExpressionContext): AnyRef = {
+    val rightValues = this.visit(ctx.right).asInstanceOf[Map[String, Double]]
+
+    if (ctx.op.EQ != null) this.visit(ctx.left).asInstanceOf[Map[String, Double]].map(k => k._1 -> (k._2 == rightValues(k._1)))
+    else if (ctx.op.LE != null) this.visit(ctx.left).asInstanceOf[Map[String, Double]].map(k => k._1 -> (k._2 <= rightValues(k._1)))
+    else if (ctx.op.GE != null) this.visit(ctx.left).asInstanceOf[Map[String, Double]].map(k => k._1 -> (k._2 >= rightValues(k._1)))
+    else if (ctx.op.LT != null) this.visit(ctx.left).asInstanceOf[Map[String, Double]].map(k => k._1 -> (k._2 < rightValues(k._1)))
+    else if (ctx.op.GT != null) this.visit(ctx.left).asInstanceOf[Map[String, Double]].map(k => k._1 -> (k._2 > rightValues(k._1)))
+    else throw new RuntimeException("Comparator operator not implemented " + ctx.op.getText)
+  }
+
   override def visitJson(ctx: QueryParser.JsonContext): AnyRef = {
     data = ctx.children.get(0).getText
     super.visitJson(ctx)
   }
+
+  private def asBoolean(ctx: ParseTree) = visit(ctx).asInstanceOf[Boolean]
+
+  private def asDouble(ctx: ParseTree) = visit(ctx).asInstanceOf[Double]
 }

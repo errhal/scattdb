@@ -27,19 +27,17 @@ object QueryService {
     val tree = parser.queryStatement()
     val visitor = new DefaultQueryVisitor
     val result = visitor.visit(tree)
-    println(result)
-
     if (visitor.isSelect && visitor.isKeyValue) {
       getKeyValue(visitor.key, visitor.dataset)
     } else if (visitor.isInsert && visitor.isKeyValue) {
       putKeyValue(visitor.key, visitor.dataset, visitor.data)
     } else if (visitor.isDelete && visitor.isKeyValue) {
       deleteKeyValue(visitor.key, visitor.dataset)
+    } else if (visitor.isSelect && visitor.isEntry && visitor.whereClause) {
+      getEntryWhereClause(message)
     } else if (visitor.isSelect && visitor.isEntry) {
       // TODO: parsing entry query param
       getEntry(visitor.dataset)
-    } else if (visitor.isSelect && visitor.isEntry && visitor.whereClause) {
-      getEntryWhereClause(message)
     } else if (visitor.isInsert && visitor.isEntry) {
       putEntry(visitor.dataset, visitor.entry)
     } else if (visitor.isDelete && visitor.isEntry) {
