@@ -30,22 +30,25 @@ object SocketListener {
       Future {
         val clientSocketOut = new PrintWriter(clientSocket.getOutputStream, true)
         val clientSocketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream))
-
-        val input = clientSocketIn.readLine()
-        // recognize one message per line
-        val socketMessageType = recognizeMessageType(input, clientSocketOut)
-        if (socketMessageType == SocketMessageType.INVALID) {
-          sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, "Invalid socket message format")
-        } else if (socketMessageType == SocketMessageType.QUERY) {
-          val responseFuture = QueryService.parseQuery(input)
-          responseFuture onComplete {
-            case Success(result) =>
-              sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, recognizeResponseType(result))
-            case Failure(t) =>
-              clientSocketOut.println(t.getMessage)
-              clientSocketIn.close()
-              clientSocket.close()
+        try {
+          val input = clientSocketIn.readLine()
+          // recognize one message per line
+          val socketMessageType = recognizeMessageType(input, clientSocketOut)
+          if (socketMessageType == SocketMessageType.INVALID) {
+            sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, "Invalid socket message format")
+          } else if (socketMessageType == SocketMessageType.QUERY) {
+            val responseFuture = QueryService.parseQuery(input)
+            responseFuture onComplete {
+              case Success(result) =>
+                sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, recognizeResponseType(result))
+              case Failure(t) =>
+                sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, t.getMessage)
+            }
           }
+        } catch {
+          case e:Exception =>
+            e.printStackTrace()
+            sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, "Something went wrong.")
         }
       }
     }
