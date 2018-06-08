@@ -19,8 +19,11 @@ whereExpression
     | left=whereExpression op=binary right=whereExpression          #binaryExpression
     | bool                                                          #boolExpression
     | IDENTIFIER                                                    #identifierExpression
+    | STRING                                                        #stringExpression
     | DECIMAL                                                       #decimalExpression
     ;
+
+
 
 comparator
  : GT | GE | LT | LE | EQ

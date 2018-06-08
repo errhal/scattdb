@@ -100,6 +100,11 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
     queriedData.map(k => k._1 -> ctx.DECIMAL().getText.toDouble)
   }
 
+  override def visitStringExpression(ctx: QueryParser.StringExpressionContext): AnyRef = {
+    val str = ctx.STRING().getText
+    queriedData.map(data => data._1 -> str.substring(1, str.length - 1))
+  }
+
   override def visitBoolExpression(ctx: QueryParser.BoolExpressionContext): AnyRef = {
     queriedData.map(k => k._1 -> ctx.getText.toBoolean)
   }
@@ -126,11 +131,11 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
   override def visitComparatorExpression(ctx: QueryParser.ComparatorExpressionContext): AnyRef = {
     val rightValues = this.visit(ctx.right).asInstanceOf[Map[String, AnyRef]]
 
-    if (ctx.op.EQ != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (compare(k._2, rightValues(k._1)) == 0))
-    else if (ctx.op.LE != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (compare(k._2, rightValues(k._1)) <= 0))
-    else if (ctx.op.GE != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (compare(k._2, rightValues(k._1)) >= 0))
-    else if (ctx.op.LT != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (compare(k._2, rightValues(k._1)) < 0))
-    else if (ctx.op.GT != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (compare(k._2, rightValues(k._1)) > 0))
+    if (ctx.op.EQ != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (k._2 != null && rightValues(k._1) != null && (compare(k._2, rightValues(k._1)) == 0)))
+    else if (ctx.op.LE != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (k._2 != null && rightValues(k._1) != null && (compare(k._2, rightValues(k._1)) <= 0)))
+    else if (ctx.op.GE != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (k._2 != null && rightValues(k._1) != null && (compare(k._2, rightValues(k._1)) >= 0)))
+    else if (ctx.op.LT != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (k._2 != null && rightValues(k._1) != null && (compare(k._2, rightValues(k._1)) < 0)))
+    else if (ctx.op.GT != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (k._2 != null && rightValues(k._1) != null && (compare(k._2, rightValues(k._1)) > 0)))
     else throw new RuntimeException("Comparator operator not implemented " + ctx.op.getText)
   }
 

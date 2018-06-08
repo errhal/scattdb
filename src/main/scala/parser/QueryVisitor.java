@@ -73,6 +73,13 @@ public interface QueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDecimalExpression(QueryParser.DecimalExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code stringExpression}
+	 * labeled alternative in {@link QueryParser#whereExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStringExpression(QueryParser.StringExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code boolExpression}
 	 * labeled alternative in {@link QueryParser#whereExpression}.
 	 * @param ctx the parse tree
