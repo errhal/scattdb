@@ -2,17 +2,20 @@ package remote.slave
 
 import akka.actor.Actor
 import akka.actor.Status.Failure
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.typesafe.scalalogging.Logger
 import managers.DatabaseManager
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 import parser.{QueryLexer, QueryParser}
 import parser.impl.DefaultQueryVisitor
 import remote.operations._
+
 import scala.collection.JavaConverters._
 
 class DBActor extends Actor {
 
   val logger = Logger(classOf[DBActor])
+  val objectMapper = new ObjectMapper
 
   def receive = {
     case SelectKeyValue(dataset, key) =>
@@ -46,8 +49,11 @@ class DBActor extends Actor {
 
         val tree = parser.queryStatement()
         val defaultQueryVisitor = new DefaultQueryVisitor
-        val result = defaultQueryVisitor.visitQueryStatement(tree)
-        sender() ! SelectEntryResult(result.asInstanceOf[Map[String, AnyRef]].asJava.toString)
+        val result = defaultQueryVisitor.visitQueryStatement(tree).asInstanceOf[Map[String, Boolean]]
+        val queriedData = defaultQueryVisitor.queriedData
+        val filteredResult = queriedData.filter(d => result(d._1))
+        sender() ! SelectEntryResult(
+          objectMapper.writeValueAsString(filteredResult.asInstanceOf[Map[String, AnyRef]].asJava))
       } catch {
         case e: Exception => sender() ! Failure(e)
       }

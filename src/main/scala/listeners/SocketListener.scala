@@ -46,7 +46,7 @@ object SocketListener {
             }
           }
         } catch {
-          case e:Exception =>
+          case e: Exception =>
             e.printStackTrace()
             sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, "Something went wrong.")
         }

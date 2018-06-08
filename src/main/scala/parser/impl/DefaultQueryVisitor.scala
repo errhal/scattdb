@@ -124,13 +124,13 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
   }
 
   override def visitComparatorExpression(ctx: QueryParser.ComparatorExpressionContext): AnyRef = {
-    val rightValues = this.visit(ctx.right).asInstanceOf[Map[String, Double]]
+    val rightValues = this.visit(ctx.right).asInstanceOf[Map[String, AnyRef]]
 
-    if (ctx.op.EQ != null) this.visit(ctx.left).asInstanceOf[Map[String, Double]].map(k => k._1 -> (k._2 == rightValues(k._1)))
-    else if (ctx.op.LE != null) this.visit(ctx.left).asInstanceOf[Map[String, Double]].map(k => k._1 -> (k._2 <= rightValues(k._1)))
-    else if (ctx.op.GE != null) this.visit(ctx.left).asInstanceOf[Map[String, Double]].map(k => k._1 -> (k._2 >= rightValues(k._1)))
-    else if (ctx.op.LT != null) this.visit(ctx.left).asInstanceOf[Map[String, Double]].map(k => k._1 -> (k._2 < rightValues(k._1)))
-    else if (ctx.op.GT != null) this.visit(ctx.left).asInstanceOf[Map[String, Double]].map(k => k._1 -> (k._2 > rightValues(k._1)))
+    if (ctx.op.EQ != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (compare(k._2, rightValues(k._1)) == 0))
+    else if (ctx.op.LE != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (compare(k._2, rightValues(k._1)) <= 0))
+    else if (ctx.op.GE != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (compare(k._2, rightValues(k._1)) >= 0))
+    else if (ctx.op.LT != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (compare(k._2, rightValues(k._1)) < 0))
+    else if (ctx.op.GT != null) this.visit(ctx.left).asInstanceOf[Map[String, AnyRef]].map(k => k._1 -> (compare(k._2, rightValues(k._1)) > 0))
     else throw new RuntimeException("Comparator operator not implemented " + ctx.op.getText)
   }
 
@@ -142,4 +142,17 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
   private def asBoolean(ctx: ParseTree) = visit(ctx).asInstanceOf[Boolean]
 
   private def asDouble(ctx: ParseTree) = visit(ctx).asInstanceOf[Double]
+
+  private def compare(first: AnyRef, second: AnyRef): Int = {
+    if (first.getClass != second.getClass) {
+      throw new IllegalArgumentException(s"Values: [$first] and [$second] are not in the same type")
+    } else first match {
+      case _: String =>
+        first.asInstanceOf[String].compare(second.asInstanceOf[String])
+      case _: Number =>
+        first.asInstanceOf[Number].doubleValue().compare(second.asInstanceOf[Number].doubleValue())
+      case _ =>
+        throw new IllegalArgumentException(s"Illegal argument type of the value: $first")
+    }
+  }
 }
