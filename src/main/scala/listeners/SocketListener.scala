@@ -19,7 +19,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object SocketListener {
 
-  val objectMapper = new ObjectMapper()
+  val objectMapper = new ObjectMapper
   objectMapper.registerModule(DefaultScalaModule)
 
   def init(serverSocket: ServerSocket): Unit = {
@@ -32,12 +32,16 @@ object SocketListener {
         val clientSocketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream))
         try {
           val input = clientSocketIn.readLine()
+
+          val deserializedClientMessage = objectMapper.readValue(input, classOf[Map[String, String]])
           // recognize one message per line
-          val socketMessageType = recognizeMessageType(input, clientSocketOut)
+          val socketMessageType = recognizeMessageType(deserializedClientMessage, clientSocketOut)
           if (socketMessageType == SocketMessageType.INVALID) {
             sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, "Invalid socket message format")
           } else if (socketMessageType == SocketMessageType.QUERY) {
-            val responseFuture = QueryService.parseQuery(input)
+
+            val responseFuture = QueryService.scatterQuery(deserializedClientMessage)
+
             responseFuture onComplete {
               case Success(result) =>
                 sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, recognizeResponseType(result))
@@ -60,13 +64,9 @@ object SocketListener {
     clientSocket.close()
   }
 
-  def recognizeMessageType(message: String, clientSocketOut: PrintWriter): SocketMessageType = {
+  def recognizeMessageType(deserializedMessage: Map[String, String], clientSocketOut: PrintWriter): SocketMessageType = {
 
-    import ExecutionContext.Implicits.global
-    if (message == null || message.split("\\[")(0) == null) {
-      return SocketMessageType.INVALID
-    }
-    message.split("\\[")(0).toLowerCase match {
+    deserializedMessage("messageType") match {
       //      TODO: change authentication to make async requests
       //      case "authentication" => if (!AuthenticationService.authenticate(message)) {
       //        clientSocketOut.println("Wrong account credentials! User not found")

@@ -1,5 +1,7 @@
 package remote.operations
 
+import scala.collection.mutable
+
 trait DbOp
 
 final case class SelectKeyValue(dataset: String, key: String) extends DbOp
@@ -15,6 +17,8 @@ final case class SelectEntryWithWhere(query: String) extends DbOp
 final case class InsertEntry(uuid: String, dataset: String, entry: String) extends DbOp
 
 final case class DeleteEntry(dataset: String) extends DbOp
+
+final case class MessageQueryWrapper(query: Map[String, String])
 
 trait DbResult
 

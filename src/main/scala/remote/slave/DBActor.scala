@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.{CharStreams, CommonTokenStream}
 import parser.{QueryLexer, QueryParser}
 import parser.impl.DefaultQueryVisitor
 import remote.operations._
+import services.QueryService
 
 import scala.collection.JavaConverters._
 
@@ -18,30 +19,6 @@ class DBActor extends Actor {
   val objectMapper = new ObjectMapper
 
   def receive = {
-    case SelectKeyValue(dataset, key) =>
-      try {
-        sender() ! SelectKeyResult(DatabaseManager.getKey(dataset, key))
-      } catch {
-        case e: Exception => sender() ! Failure(e)
-      }
-    case InsertKeyValue(dataset, key, value) =>
-      try {
-        sender() ! InsertKeyResult(DatabaseManager.putKey(dataset, key, value))
-      } catch {
-        case e: Exception => sender() ! Failure(e)
-      }
-    case DeleteKeyValue(dataset, key) =>
-      try {
-        sender() ! DeleteEntryResult(DatabaseManager.deleteKey(dataset, key))
-      } catch {
-        case e: Exception => sender() ! Failure(e)
-      }
-    case SelectEntry(dataset) =>
-      try {
-        sender() ! SelectEntryResult(DatabaseManager.getEntry(dataset))
-      } catch {
-        case e: Exception => sender() ! Failure(e)
-      }
     case SelectEntryWithWhere(message) =>
       try {
         val lexer = new QueryLexer(CharStreams.fromString(message))
@@ -66,6 +43,12 @@ class DBActor extends Actor {
     case DeleteEntry(dataset) =>
       try {
         sender ! DeleteEntryResult(DatabaseManager.deleteEntry(dataset))
+      }
+    case MessageQueryWrapper(query) =>
+      try {
+        sender ! QueryService.parseMessage(query)
+      } catch {
+        case e: Exception => sender() ! Failure(e)
       }
   }
 }

@@ -3,14 +3,14 @@ grammar Query;
 queryStatement : selectKeyStatement | insertKeyStatement | deleteKeyStatement
                 | selectEntryStatement | selectEntryStatementWithWhere | insertEntryStatement | deleteEntryStatement ;
 
-selectKeyStatement : QUERY '[' SELECT KEY '(' IDENTIFIER ')' FROM IDENTIFIER ']' ;
-insertKeyStatement : QUERY '[' INSERT KEY '(' IDENTIFIER ')' INTO IDENTIFIER dataVal ']' ;
-deleteKeyStatement : QUERY '[' DELETE KEY '(' IDENTIFIER ')' FROM IDENTIFIER ']' ;
+selectKeyStatement : SELECT KEY '(' IDENTIFIER ')' FROM IDENTIFIER ;
+insertKeyStatement : INSERT KEY '(' IDENTIFIER ')' INTO IDENTIFIER dataVal ;
+deleteKeyStatement : DELETE KEY '(' IDENTIFIER ')' FROM IDENTIFIER ;
 
-selectEntryStatement : QUERY '[' SELECT ENTRY '(' IDENTIFIER ')' FROM IDENTIFIER ']' ;
-selectEntryStatementWithWhere : QUERY '[' SELECT ENTRY '(' IDENTIFIER ')' FROM IDENTIFIER WHERE whereExpression ']' ;
-insertEntryStatement : QUERY '[' INSERT ENTRY '(' json ')' INTO IDENTIFIER ']' ;
-deleteEntryStatement : QUERY '[' DELETE ENTRY FROM IDENTIFIER ']' ;
+selectEntryStatement : SELECT ENTRY '(' IDENTIFIER ')' FROM IDENTIFIER ;
+selectEntryStatementWithWhere : SELECT ENTRY '(' IDENTIFIER ')' FROM IDENTIFIER WHERE whereExpression ;
+insertEntryStatement : INSERT ENTRY '(' json ')' INTO IDENTIFIER ;
+deleteEntryStatement : DELETE ENTRY FROM IDENTIFIER ;
 
 whereExpression
     : LPAREN whereExpression RPAREN                                 #parenExpression
@@ -39,7 +39,6 @@ bool
 
 dataVal : DATA '(' json ')' ;
 
-QUERY       : [qQ][uU][eE][rR][yY] ;
 SELECT      : [sS][eE][lL][eE][cC][tT] ;
 INSERT      : [iI][nN][sS][eE][rR][tT] ;
 DELETE      : [dD][eE][lL][eE][tT][eE] ;
