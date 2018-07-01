@@ -1,7 +1,5 @@
 package remote.operations
 
-import scala.collection.mutable
-
 trait DbOp
 
 final case class SelectKeyValue(dataset: String, key: String) extends DbOp
@@ -30,6 +28,6 @@ final case class DeleteKeyResult(result: String) extends DbResult
 
 final case class SelectEntryResult(result: String) extends DbResult
 
-final case class InsertEntryResult(result: Boolean) extends DbResult
+final case class InsertEntryResult(result: String) extends DbResult
 
 final case class DeleteEntryResult(result: String) extends DbResult

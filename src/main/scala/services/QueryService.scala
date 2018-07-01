@@ -14,6 +14,7 @@ import scala.collection.immutable.HashMap
 import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.collection.JavaConverters._
 
 object QueryService {
 
@@ -22,7 +23,7 @@ object QueryService {
 
   implicit val _ = Timeout(5 seconds)
 
-  def parseMessage(message: Map[String, String]): Map[String, String] = {
+  def parseMessage(message: Map[String, String]): DbResult = {
 
     val query = message("query")
     val lexer = new QueryLexer(CharStreams.fromString(query))
@@ -30,34 +31,40 @@ object QueryService {
 
     val tree = parser.queryStatement()
     val visitor = new DefaultQueryVisitor
-    val result = objectMapper.writeValueAsString(visitor.visit(tree))
+    val result = visitor.visit(tree).asInstanceOf[Map[String, AnyRef]]
 
-    val responseMessage = new HashMap[String, String]
+    val serializedResult = objectMapper.writeValueAsString(result.asJava)
     var resultMessage = ""
 
     if (visitor.isSelect && visitor.isKeyValue) {
       resultMessage = DatabaseManager.getKey(visitor.dataset, visitor.key)
+      SelectKeyResult(resultMessage)
     } else if (visitor.isInsert && visitor.isKeyValue) {
       resultMessage = DatabaseManager.putKey(visitor.dataset, visitor.key, visitor.data)
+      InsertKeyResult(resultMessage)
     } else if (visitor.isDelete && visitor.isKeyValue) {
       resultMessage = DatabaseManager.deleteKey(visitor.dataset, visitor.key)
+      DeleteKeyResult(resultMessage)
     } else if (visitor.isSelect && visitor.isEntry && visitor.whereClause) {
-      resultMessage = result
+      resultMessage = serializedResult
+      SelectEntryResult(resultMessage)
     } else if (visitor.isSelect && visitor.isEntry) {
       // TODO: parsing entry query param
       resultMessage = DatabaseManager.getEntry(visitor.dataset)
+      SelectEntryResult(resultMessage)
     } else if (visitor.isInsert && visitor.isEntry) {
       if (!message.contains("uuid")) {
         throw new IllegalArgumentException("Message does not contain uuid.")
       }
       val uuid = message("uuid")
       resultMessage = DatabaseManager.putEntry(uuid, visitor.dataset, visitor.entry).toString
+      InsertEntryResult(resultMessage)
     } else if (visitor.isDelete && visitor.isEntry) {
       resultMessage = DatabaseManager.deleteEntry(visitor.dataset)
+      DeleteEntryResult(resultMessage)
     } else {
       throw new IllegalArgumentException("Invalid query")
     }
-    Map("result" -> resultMessage)
   }
 
   def getEntryWhereClause(message: String): Future[Any] = {

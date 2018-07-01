@@ -68,14 +68,15 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
     val deserializedJavaMap = objectMapper.readValue(serializedData, classOf[java.util.Map[String, AnyRef]])
     queriedData = Map(deserializedJavaMap.asScala.toSeq: _*)
     booleanResult = queriedData.map((k) => k._1 -> false)
-    super.visit(ctx.whereExpression())
+    val matchedData = super.visit(ctx.whereExpression()).asInstanceOf[Map[String, Boolean]]
+    queriedData.filter(data => matchedData(data._1))
   }
 
   override def visitInsertEntryStatement(ctx: QueryParser.InsertEntryStatementContext): AnyRef = {
     isInsert = true
     isEntry = true
-    entry = ctx.children.get(5).getText
-    dataset = ctx.children.get(8).getText
+    entry = ctx.json().getText
+    dataset = ctx.IDENTIFIER().getText
     super.visitInsertEntryStatement(ctx)
   }
 
