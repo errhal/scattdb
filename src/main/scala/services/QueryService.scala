@@ -67,25 +67,6 @@ object QueryService {
     }
   }
 
-  def getEntryWhereClause(message: String): Future[Any] = {
-    var futures = List.empty[Future[Any]]
-    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? SelectEntryWithWhere(message))
-    Future.sequence(futures)
-  }
-
-  def putEntry(dataset: String, entry: String): Future[Any] = {
-    var futures = List.empty[Future[Any]]
-    val dataUuid = generateUUID
-    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? InsertEntry(dataUuid, dataset, entry))
-    Future.sequence(futures)
-  }
-
-  def deleteEntry(dataset: String): Future[Any] = {
-    var futures = List.empty[Future[Any]]
-    for (actorRef <- actorRefs) futures = futures.+:(actorRef ? DeleteEntry(dataset))
-    Future.sequence(futures)
-  }
-
   def generateUUID: String = {
     java.util.UUID.randomUUID().toString.replaceAll("-", "")
   }

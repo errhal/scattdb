@@ -19,36 +19,13 @@ class DBActor extends Actor {
   val objectMapper = new ObjectMapper
 
   def receive = {
-    case SelectEntryWithWhere(message) =>
-      try {
-        val lexer = new QueryLexer(CharStreams.fromString(message))
-        val parser = new QueryParser(new CommonTokenStream(lexer))
-
-        val tree = parser.queryStatement()
-        val defaultQueryVisitor = new DefaultQueryVisitor
-        val result = defaultQueryVisitor.visitQueryStatement(tree).asInstanceOf[Map[String, Boolean]]
-        val queriedData = defaultQueryVisitor.queriedData
-        val filteredResult = queriedData.filter(d => result(d._1))
-        sender() ! SelectEntryResult(
-          objectMapper.writeValueAsString(filteredResult.asInstanceOf[Map[String, AnyRef]].asJava))
-      } catch {
-        case e: Exception => sender() ! Failure(e)
-      }
-    case InsertEntry(uuid, dataset, entry) =>
-      try {
-        sender ! InsertEntryResult(DatabaseManager.putEntry(uuid, dataset, entry))
-      } catch {
-        case e: Exception => sender ! Failure(e)
-      }
-    case DeleteEntry(dataset) =>
-      try {
-        sender ! DeleteEntryResult(DatabaseManager.deleteEntry(dataset))
-      }
     case MessageQueryWrapper(query) =>
       try {
         sender ! QueryService.parseMessage(query)
       } catch {
         case e: Exception => sender() ! Failure(e)
       }
+    case _ =>
+      sender ! s"Wrong message for ${classOf[DBActor].getSimpleName}."
   }
 }

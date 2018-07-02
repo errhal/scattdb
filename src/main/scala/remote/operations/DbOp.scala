@@ -2,18 +2,6 @@ package remote.operations
 
 trait DbOp
 
-final case class SelectKeyValue(dataset: String, key: String) extends DbOp
-
-final case class InsertKeyValue(dataset: String, key: String, value: String) extends DbOp
-
-final case class DeleteKeyValue(dataset: String, key: String) extends DbOp
-
-final case class SelectEntry(dataset: String) extends DbOp
-
-final case class SelectEntryWithWhere(query: String) extends DbOp
-
-final case class InsertEntry(uuid: String, dataset: String, entry: String) extends DbOp
-
 final case class DeleteEntry(dataset: String) extends DbOp
 
 final case class MessageQueryWrapper(query: Map[String, String])
