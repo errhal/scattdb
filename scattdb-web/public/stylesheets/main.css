@@ -25,3 +25,7 @@ body {
     padding: 8px 20px;
     margin: 3px 5px 0 5px;
 }
+
+.content {
+    float: left;
+}

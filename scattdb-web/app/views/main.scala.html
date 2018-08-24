@@ -9,8 +9,22 @@
 
     </head>
     <body>
+        <div class="menu">
+            <h1 class="menu-header">ScattDB</h1>
+            <a href="/" class="menu-item">
+                Dashboard
+            </a>
+            <a href="/console" class="menu-item">
+                Console
+            </a>
+            <a href="/settings" class="menu-item">
+                Settings
+            </a>
+            <a href="#" class="menu-item">
+                Logout
+            </a>
+        </div>
         @content
-
-      <script src="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.versioned("javascripts/main.js")" type="text/javascript"></script>
     </body>
 </html>
