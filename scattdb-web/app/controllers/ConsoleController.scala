@@ -7,6 +7,11 @@ import play.api.mvc._
 class ConsoleController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   def console() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.console())
+    Ok(views.html.console(null))
+  }
+
+  def consolePost() = Action { implicit request: Request[AnyContent] =>
+    val query = request.body.asFormUrlEncoded.get("query").head
+    Ok(views.html.console(query))
   }
 }

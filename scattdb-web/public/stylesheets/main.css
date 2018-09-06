@@ -7,6 +7,7 @@ body {
     background-color: #789694;
     float: left;
     height: 100vh;
+    width: 15%;
 }
 
 .menu-header {
@@ -27,5 +28,19 @@ body {
 }
 
 .content {
-    float: left;
+    padding-left: 50px;
+    padding-top: 30px;
+    display: inline-block;
+    width: 85%;
+    box-sizing: border-box;
+    height: 100vh;
+}
+
+.console-query-textarea {
+    width: 900px;
+    height: 300px;
+}
+
+.console-query-submit {
+    display: block;
 }
