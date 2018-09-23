@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import managers.DatabaseManager
 import org.antlr.v4.runtime.tree.ParseTree
 import parser.{QueryBaseVisitor, QueryParser}
+import services.StatusService
+
 import collection.JavaConverters._
 
 /**
@@ -24,6 +26,7 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
   var isKeyValue = false
   var isEntry = false
   var whereClause = false
+  var showStatus = false
 
   var queriedData: Map[String, AnyRef] = _
   var booleanResult: Map[String, Boolean] = Map()
@@ -85,6 +88,13 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
     isEntry = true
     dataset = ctx.IDENTIFIER.getText
     super.visitDeleteEntryStatement(ctx)
+  }
+
+  override def visitShowStatus(ctx: QueryParser.ShowStatusContext): AnyRef = {
+    var status = Map[String, String]()
+    status += ("connections_number" -> StatusService.connectionsNumber.toString)
+    showStatus = true
+    status
   }
 
   override def visitBinaryExpression(ctx: QueryParser.BinaryExpressionContext): AnyRef = {

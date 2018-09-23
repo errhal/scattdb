@@ -8,6 +8,8 @@ final case class MessageQueryWrapper(query: Map[String, String])
 
 trait DbResult
 
+final case class BaseDbResult(result: String) extends DbResult
+
 final case class SelectKeyResult(result: String) extends DbResult
 
 final case class InsertKeyResult(result: String) extends DbResult

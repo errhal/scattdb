@@ -9,7 +9,7 @@ import enums.SocketMessageType
 import enums.SocketMessageType.SocketMessageType
 import managers.DatabaseManager
 import remote.operations._
-import services.QueryService
+import services.{QueryService, StatusService}
 
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,13 +27,14 @@ object SocketListener {
     DatabaseManager.initDbFiles()
     while (true) {
       val clientSocket = serverSocket.accept()
+      StatusService.connectionsNumber.incrementAndGet()
       Future {
         val clientSocketOut = new PrintWriter(clientSocket.getOutputStream, true)
         val clientSocketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream))
         try {
           val input = clientSocketIn.readLine()
-
           val deserializedClientMessage = objectMapper.readValue(input, classOf[Map[String, String]])
+
           // recognize one message per line
           val socketMessageType = recognizeMessageType(deserializedClientMessage, clientSocketOut)
           if (socketMessageType == SocketMessageType.INVALID) {
@@ -92,6 +93,7 @@ object SocketListener {
         objectMapper.writeValueAsString(result)
       case i: InsertEntryResult => i
       case d: DeleteEntryResult => d
+      case b: BaseDbResult => b.result
       case _ => "Malformed response from node."
     }
     case _ => "Received unsupported message"

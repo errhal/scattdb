@@ -62,6 +62,8 @@ object QueryService {
     } else if (visitor.isDelete && visitor.isEntry) {
       resultMessage = DatabaseManager.deleteEntry(visitor.dataset)
       DeleteEntryResult(resultMessage)
+    } else if (visitor.showStatus) {
+      BaseDbResult(serializedResult)
     } else {
       throw new IllegalArgumentException("Invalid query")
     }

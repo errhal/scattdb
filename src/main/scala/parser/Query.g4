@@ -1,7 +1,8 @@
 grammar Query;
 
 queryStatement : selectKeyStatement | insertKeyStatement | deleteKeyStatement
-                | selectEntryStatement | selectEntryStatementWithWhere | insertEntryStatement | deleteEntryStatement ;
+                | selectEntryStatement | selectEntryStatementWithWhere | insertEntryStatement | deleteEntryStatement
+                | showStatus ;
 
 selectKeyStatement : SELECT KEY '(' IDENTIFIER ')' FROM IDENTIFIER ;
 insertKeyStatement : INSERT KEY '(' IDENTIFIER ')' INTO IDENTIFIER dataVal ;
@@ -11,6 +12,8 @@ selectEntryStatement : SELECT ENTRY '(' IDENTIFIER ')' FROM IDENTIFIER ;
 selectEntryStatementWithWhere : SELECT ENTRY '(' IDENTIFIER ')' FROM IDENTIFIER WHERE whereExpression ;
 insertEntryStatement : INSERT ENTRY '(' json ')' INTO IDENTIFIER ;
 deleteEntryStatement : DELETE ENTRY FROM IDENTIFIER ;
+
+showStatus : SHOW STATUS ;
 
 whereExpression
     : LPAREN whereExpression RPAREN                                 #parenExpression
@@ -48,6 +51,8 @@ INTO        : [iI][nN][tT][oO] ;
 FROM        : [fF][rR][oO][mM] ;
 DATA        : [dD][aA][tT][aA] ;
 WHERE       : [wW][hH][eE][rR][eE] ;
+SHOW        : [sS][hH][oO][wW] ;
+STATUS      : [sS][tT][aA][tT][uU][sS] ;
 AND         : 'AND' ;
 OR          : 'OR' ;
 NOT         : 'NOT';

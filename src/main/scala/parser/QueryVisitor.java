@@ -59,6 +59,12 @@ public interface QueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeleteEntryStatement(QueryParser.DeleteEntryStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link QueryParser#showStatus}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShowStatus(QueryParser.ShowStatusContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code binaryExpression}
 	 * labeled alternative in {@link QueryParser#whereExpression}.
 	 * @param ctx the parse tree
