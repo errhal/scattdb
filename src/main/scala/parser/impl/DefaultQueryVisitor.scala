@@ -91,8 +91,9 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
   }
 
   override def visitShowStatus(ctx: QueryParser.ShowStatusContext): AnyRef = {
-    var status = Map[String, String]()
-    status += ("connections_number" -> StatusService.connectionsNumber.toString)
+    var status = Map[String, AnyRef]()
+    status += ("totalConnectionsNumber" -> StatusService.totalConnectionsNumber)
+    status += ("currentConnectionsNumber" -> StatusService.currentConnectionsNumber)
     showStatus = true
     status
   }

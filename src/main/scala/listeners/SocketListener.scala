@@ -27,8 +27,11 @@ object SocketListener {
     DatabaseManager.initDbFiles()
     while (true) {
       val clientSocket = serverSocket.accept()
-      StatusService.connectionsNumber.incrementAndGet()
       Future {
+
+        // start gathering statistics about current request
+        beforeQueryStatus()
+
         val clientSocketOut = new PrintWriter(clientSocket.getOutputStream, true)
         val clientSocketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream))
         try {
@@ -55,6 +58,9 @@ object SocketListener {
             e.printStackTrace()
             sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, "Something went wrong.")
         }
+
+        // end of the request - update statistics
+        afterQueryStatus()
       }
     }
   }
@@ -97,5 +103,14 @@ object SocketListener {
       case _ => "Malformed response from node."
     }
     case _ => "Received unsupported message"
+  }
+
+  def beforeQueryStatus() = {
+    StatusService.totalConnectionsNumber.incrementAndGet()
+    StatusService.currentConnectionsNumber.incrementAndGet()
+  }
+
+  def afterQueryStatus() = {
+    StatusService.currentConnectionsNumber.decrementAndGet()
   }
 }

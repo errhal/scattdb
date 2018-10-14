@@ -3,12 +3,19 @@ package stress
 import java.io.{BufferedReader, InputStreamReader, PrintWriter}
 import java.net.{ConnectException, Socket}
 
+import client.Client.objectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 abstract class AbstractStressTest {
-  var timeout = 3000
-  var requestNumber = 1000
+  var timeout = 30000
+  var requestNumber = 100000
+
+  val objectMapper = new ObjectMapper()
+  objectMapper.registerModule(DefaultScalaModule)
 
   def main(args: Array[String]) {
 
@@ -22,6 +29,7 @@ abstract class AbstractStressTest {
     }
 
     val futures = List.empty[Future[Any]]
+    var message = Map("messageType" -> "query")
 
     val startTime = System.nanoTime()
 
@@ -31,7 +39,9 @@ abstract class AbstractStressTest {
           val socket = new Socket("127.0.0.1", 7000)
           val reader = new BufferedReader(new InputStreamReader(socket.getInputStream))
           val printWriter = new PrintWriter(socket.getOutputStream, true)
-          printWriter.println(getQueryPattern(i))
+
+          message += ("query" -> getQueryPattern(i))
+          printWriter.println(objectMapper.writeValueAsString(message))
           var r = reader.readLine()
           while (r != null) {
             r = reader.readLine()
@@ -46,16 +56,14 @@ abstract class AbstractStressTest {
 
     val seqFutures = Future.sequence(futures)
     seqFutures.onComplete({
-      case Success(_) => {
+      case Success(_) =>
         val endTime = System.nanoTime()
-        println("Stress test finished in " + (endTime - startTime) / 1000000 + "ms.")
-      }
-      case Failure(e) => {
+        println("Stress test finished in " + (endTime - startTime) / 1000000 + " ms.")
+        println("Req/s: " + (requestNumber.asInstanceOf[Double] * 1000000000 / (endTime - startTime)))
+        println("Average request time: " + (endTime - startTime) / requestNumber.asInstanceOf[Double] / 1000000 + " ms.")
+      case Failure(e) =>
         println(e)
-      }
     })
-
-    Thread.sleep(timeout)
   }
 
   def getQueryPattern(index: Integer): String
