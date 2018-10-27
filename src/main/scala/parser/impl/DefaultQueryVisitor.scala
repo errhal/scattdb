@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import managers.DatabaseManager
 import org.antlr.v4.runtime.tree.ParseTree
 import parser.{QueryBaseVisitor, QueryParser}
+import services.StatusService
+
 import collection.JavaConverters._
 
 /**
@@ -24,6 +26,7 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
   var isKeyValue = false
   var isEntry = false
   var whereClause = false
+  var showStatus = false
 
   var queriedData: Map[String, AnyRef] = _
   var booleanResult: Map[String, Boolean] = Map()
@@ -68,14 +71,15 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
     val deserializedJavaMap = objectMapper.readValue(serializedData, classOf[java.util.Map[String, AnyRef]])
     queriedData = Map(deserializedJavaMap.asScala.toSeq: _*)
     booleanResult = queriedData.map((k) => k._1 -> false)
-    super.visit(ctx.whereExpression())
+    val matchedData = super.visit(ctx.whereExpression()).asInstanceOf[Map[String, Boolean]]
+    queriedData.filter(data => matchedData(data._1))
   }
 
   override def visitInsertEntryStatement(ctx: QueryParser.InsertEntryStatementContext): AnyRef = {
     isInsert = true
     isEntry = true
-    entry = ctx.children.get(5).getText
-    dataset = ctx.children.get(8).getText
+    entry = ctx.json().getText
+    dataset = ctx.IDENTIFIER().getText
     super.visitInsertEntryStatement(ctx)
   }
 
@@ -84,6 +88,14 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
     isEntry = true
     dataset = ctx.IDENTIFIER.getText
     super.visitDeleteEntryStatement(ctx)
+  }
+
+  override def visitShowStatus(ctx: QueryParser.ShowStatusContext): AnyRef = {
+    var status = Map[String, AnyRef]()
+    status += ("totalConnectionsNumber" -> StatusService.totalConnectionsNumber)
+    status += ("currentConnectionsNumber" -> StatusService.currentConnectionsNumber)
+    showStatus = true
+    status
   }
 
   override def visitBinaryExpression(ctx: QueryParser.BinaryExpressionContext): AnyRef = {

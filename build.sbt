@@ -15,5 +15,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
   "org.antlr" % "antlr4-runtime" % "4.7.1",
   "org.slf4j" % "slf4j-api" % "1.7.25",
-  "org.slf4j" % "slf4j-log4j12" % "1.7.25"
+  "org.slf4j" % "slf4j-log4j12" % "1.7.25",
+  "org.scalatest" %% "scalatest" % "3.2.0-SNAP9" % Test
 )

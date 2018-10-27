@@ -1,0 +1,21 @@
+@import helper._
+@(result: String)(implicit request: RequestHeader)
+@main("ScattDB console - Console") {
+
+    <div class="content">
+        <h2>
+            Console
+        </h2>
+        @form(routes.ConsoleController.consolePost()) {
+            <textarea name="query" placeholder="Type your query here." class="console-query-textarea"></textarea>
+            @CSRF.formField
+            <input type="submit" class="console-query-submit"/>
+        }
+        @if(result != null) {
+            <h2>
+                Result
+            </h2>
+            @result
+        }
+    </div>
+}

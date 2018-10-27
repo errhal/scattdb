@@ -9,7 +9,7 @@ import enums.SocketMessageType
 import enums.SocketMessageType.SocketMessageType
 import managers.DatabaseManager
 import remote.operations._
-import services.QueryService
+import services.{QueryService, StatusService}
 
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.{ExecutionContext, Future}
@@ -19,7 +19,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object SocketListener {
 
-  val objectMapper = new ObjectMapper()
+  val objectMapper = new ObjectMapper
   objectMapper.registerModule(DefaultScalaModule)
 
   def init(serverSocket: ServerSocket): Unit = {
@@ -28,16 +28,24 @@ object SocketListener {
     while (true) {
       val clientSocket = serverSocket.accept()
       Future {
+
+        // start gathering statistics about current request
+        beforeQueryStatus()
+
         val clientSocketOut = new PrintWriter(clientSocket.getOutputStream, true)
         val clientSocketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream))
         try {
           val input = clientSocketIn.readLine()
+          val deserializedClientMessage = objectMapper.readValue(input, classOf[Map[String, String]])
+
           // recognize one message per line
-          val socketMessageType = recognizeMessageType(input, clientSocketOut)
+          val socketMessageType = recognizeMessageType(deserializedClientMessage, clientSocketOut)
           if (socketMessageType == SocketMessageType.INVALID) {
             sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, "Invalid socket message format")
           } else if (socketMessageType == SocketMessageType.QUERY) {
-            val responseFuture = QueryService.parseQuery(input)
+
+            val responseFuture = QueryService.scatterQuery(deserializedClientMessage)
+
             responseFuture onComplete {
               case Success(result) =>
                 sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, recognizeResponseType(result))
@@ -50,6 +58,9 @@ object SocketListener {
             e.printStackTrace()
             sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, "Something went wrong.")
         }
+
+        // end of the request - update statistics
+        afterQueryStatus()
       }
     }
   }
@@ -60,13 +71,9 @@ object SocketListener {
     clientSocket.close()
   }
 
-  def recognizeMessageType(message: String, clientSocketOut: PrintWriter): SocketMessageType = {
+  def recognizeMessageType(deserializedMessage: Map[String, String], clientSocketOut: PrintWriter): SocketMessageType = {
 
-    import ExecutionContext.Implicits.global
-    if (message == null || message.split("\\[")(0) == null) {
-      return SocketMessageType.INVALID
-    }
-    message.split("\\[")(0).toLowerCase match {
+    deserializedMessage("messageType") match {
       //      TODO: change authentication to make async requests
       //      case "authentication" => if (!AuthenticationService.authenticate(message)) {
       //        clientSocketOut.println("Wrong account credentials! User not found")
@@ -92,8 +99,18 @@ object SocketListener {
         objectMapper.writeValueAsString(result)
       case i: InsertEntryResult => i
       case d: DeleteEntryResult => d
+      case b: BaseDbResult => b.result
       case _ => "Malformed response from node."
     }
     case _ => "Received unsupported message"
+  }
+
+  def beforeQueryStatus() = {
+    StatusService.totalConnectionsNumber.incrementAndGet()
+    StatusService.currentConnectionsNumber.incrementAndGet()
+  }
+
+  def afterQueryStatus() = {
+    StatusService.currentConnectionsNumber.decrementAndGet()
   }
 }

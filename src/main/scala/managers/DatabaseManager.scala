@@ -140,12 +140,12 @@ object DatabaseManager {
     objectMapper.writeValueAsString(entry)
   }
 
-  def putEntry(uuid: String, dataset: String, entry: String): Boolean = {
+  def putEntry(uuid: String, dataset: String, entry: String): String = {
     //TODO: persistence data
     val deserializedEntry = objectMapper.readValue(entry, classOf[JsonNode])
     val isInserted = putEntryIntoMem(uuid, dataset, deserializedEntry)
     if (isInserted) if (ConfigurationProvider.isEntryPersistenceEnabled()) persistEntry(dataset)
-    isInserted
+    isInserted.toString
   }
 
   def deleteEntry(dataset: String): String = {
