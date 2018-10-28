@@ -8,6 +8,22 @@ import com.typesafe.config.{ConfigException, ConfigFactory}
 import scala.io.Source
 import scala.util.Try
 
+/**
+  * Object for obtaining general database properties from resources/config.properties file.
+  *
+  * Available configuration properties:
+  *
+  * scattdb.port - port for listening client queries (9966 by default)
+  * scattdb.dir - directory for persisted db data (/tmp/scattdb by default)
+  * scattdb.persistKeyValue - true if needed to persist KV data, false otherwise
+  * scattdb.persistEntries - true if needed to persist entries data, false otherwise
+  * scattdb.serverType - server type in architecture. There are mainly 3 types of server:
+  *   - master/slave - all in one, node can receive and realize queries on the same JVM
+  *   - master - for receiving and scattering queries over other nodes
+  *   - slave - only for executing queries for a master
+  * scattdb.enableStats - true if needed to get statistics about state of the database
+  *
+  */
 object ConfigurationProvider {
 
   val properties = new Properties
@@ -26,10 +42,10 @@ object ConfigurationProvider {
 
   }
 
-  def getDefaultPort(): Int = Try(getProperty("scattdb.default.port").toInt).getOrElse(9966)
+  def getDefaultPort(): Int = Try(getProperty("scattdb.port").toInt).getOrElse(9966)
 
   def getDbLocation(): String = {
-    var db = Try(getProperty("scattdb.db.files")).getOrElse(defaultDatabaseDir)
+    var db = Try(getProperty("scattdb.dir")).getOrElse(defaultDatabaseDir)
     if (db.isEmpty) db = defaultDatabaseDir
     db
   }

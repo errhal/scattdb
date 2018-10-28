@@ -6,12 +6,12 @@ Actual supported database is key value store with optional persistence.
 
 Properties needed to set before running application node:
 ```    
-scattdb.default.port
+scattdb.port
 ```
 Describes port number, what you like to run node on.
 
 ```
-scattdb.db.files
+scattdb.dir
 ```
 Directory for storing db files (needed if data is persisted).
 

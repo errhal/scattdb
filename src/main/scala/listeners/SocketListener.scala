@@ -58,9 +58,6 @@ object SocketListener {
             e.printStackTrace()
             sendMessageCloseSocket(clientSocket, clientSocketIn, clientSocketOut, "Something went wrong.")
         }
-
-        // end of the request - update statistics
-        afterQueryStatus()
       }
     }
   }
@@ -69,6 +66,9 @@ object SocketListener {
     clientSocketOut.println(msg)
     clientSocketIn.close()
     clientSocket.close()
+
+    // end of the request - update stats
+    afterQueryStatus()
   }
 
   def recognizeMessageType(deserializedMessage: Map[String, String], clientSocketOut: PrintWriter): SocketMessageType = {
