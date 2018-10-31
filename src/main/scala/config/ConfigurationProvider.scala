@@ -26,11 +26,15 @@ import scala.util.Try
   */
 object ConfigurationProvider {
 
-  val properties = new Properties
-  val defaultDatabaseDir = "/tmp/scattdb"
-  val defaultIsDbInMemEnabled = false
+  private val properties = new Properties
+  private val defaultDatabaseDir = "/tmp/scattdb"
+  private val defaultIsDbInMemEnabled = false
   val defaultKeyValuePrefix = "kv_"
   val defaultEntryPrefix = "entry_"
+  private val defaultIsAuthenticationEnabled = true
+  private val defaultUsername = "root"
+  private val defaultPassword = "default_password"
+
   val hostsConfigPath = "hosts.conf"
   val hostsPropertyPath = "scattdb.hosts"
 
@@ -55,6 +59,15 @@ object ConfigurationProvider {
 
   def isEntryPersistenceEnabled(): Boolean =
     Try(getProperty("scattdb.persistKeyValue").toBoolean).getOrElse(defaultIsDbInMemEnabled)
+
+  def isAuthenticationEnabled(): Boolean =
+    Try(getProperty("scattdb.authentication").toBoolean).getOrElse(defaultIsAuthenticationEnabled)
+
+  def getUsername(): String =
+    Try(getProperty("scattdb.username")).getOrElse(defaultUsername)
+
+  def getPassword(): String =
+    Try(getProperty("scattdb.password")).getOrElse(defaultPassword)
 
   def getServerType(): Int = {
     getProperty("scattdb.serverType") match {

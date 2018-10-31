@@ -1,5 +1,7 @@
 package parser.impl
 
+import java.util
+
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import managers.DatabaseManager
 import org.antlr.v4.runtime.tree.ParseTree
@@ -70,7 +72,7 @@ class DefaultQueryVisitor extends QueryBaseVisitor[AnyRef] {
     val serializedData = DatabaseManager.getEntry(dataset)
     val deserializedJavaMap = objectMapper.readValue(serializedData, classOf[java.util.Map[String, AnyRef]])
     queriedData = Map(deserializedJavaMap.asScala.toSeq: _*)
-    booleanResult = queriedData.map((k) => k._1 -> false)
+    booleanResult = queriedData.map(k => k._1 -> false)
     val matchedData = super.visit(ctx.whereExpression()).asInstanceOf[Map[String, Boolean]]
     queriedData.filter(data => matchedData(data._1))
   }
