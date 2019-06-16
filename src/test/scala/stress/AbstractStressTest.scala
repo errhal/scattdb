@@ -7,11 +7,12 @@ import client.Client.objectMapper
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.io.StdIn
 import scala.util.{Failure, Success}
+import scala.concurrent.duration._
 
 abstract class AbstractStressTest {
-  var timeout = 30000
   var requestNumber = 100000
 
   val objectMapper = new ObjectMapper()
@@ -20,12 +21,12 @@ abstract class AbstractStressTest {
   def main(args: Array[String]) {
 
     implicit val ec = ExecutionContext.global
+    var isCompleted = false
 
     if (args.length == 1) {
       requestNumber = args(0).toInt
     } else if (args.length == 2) {
       requestNumber = args(0).toInt
-      timeout = args(1).toInt
     }
 
     val futures = List.empty[Future[Any]]
@@ -61,9 +62,14 @@ abstract class AbstractStressTest {
         println("Stress test finished in " + (endTime - startTime) / 1000000 + " ms.")
         println("Req/s: " + (requestNumber.asInstanceOf[Double] * 1000000000 / (endTime - startTime)))
         println("Average request time: " + (endTime - startTime) / requestNumber.asInstanceOf[Double] / 1000000 + " ms.")
+        isCompleted = true
       case Failure(e) =>
         println(e)
     })
+
+    while (!isCompleted) {
+      Thread.sleep(1000)
+    }
   }
 
   def getQueryPattern(index: Integer): String
